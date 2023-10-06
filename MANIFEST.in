@@ -1,0 +1,2 @@
+include invest/symbols/borsa_italiana.csv
+include invest/symbols/tokyo_stock_exchange.csv
