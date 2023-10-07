@@ -2,6 +2,7 @@ import pandas as pd
 from invest.fundamental_analysis import main_fundamental_indicators
 from invest.technical_analysis import detect_trend
 import piecewise_regression
+import numpy as np
 
 def compute_score(indicatori : pd.DataFrame):
 
@@ -22,6 +23,7 @@ def compute_score(indicatori : pd.DataFrame):
 
     #EFFICIENCY
     indicatori['score_efficiency_ATR'] = score_quantile(indicatori['Asset Turnover Ratio'])
+    indicatori.loc[indicatori['sector'] == 'Financial Services', 'score_efficiency_ATR'] == np.nan
     indicatori['score_efficiency_NIPE'] = score_NIPE(indicatori['Net income per employee'])
 
     #SOLVENCY
@@ -30,7 +32,7 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'])
     indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'])
     indicatori['score_solvency_EM'] = score_quantile(indicatori['Equity Multiplier'])
-    indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=3)
+    indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=np.nan)
 
     #VALUE
     indicatori['score_value_PE'] = score_PE(indicatori['PE'])
@@ -41,15 +43,12 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_value_ROCE'] = score_ROCE(indicatori['ROCE'])
     indicatori['score_value_EPS'] = score_EPS(indicatori['EPS over price'])
     indicatori['score_value_BVS'] = score_quantile(indicatori['Book Value per Share'])
-    indicatori['score_value_PFC'] = score_quantile(indicatori['Price to free cash flow']**-1)
+    indicatori['score_value_PFC'] = score_quantile(indicatori['Price to free cash flow']**-1, nan_score = np.nan)
+    indicatori['score_value_graham'] = score_graham(indicatori['price_over_graham'])
 
     #TECHNICAL
-    indicatori['score_technical_TM'] = score_quantile(indicatori['trend_magnitude'])
+    indicatori['score_technical_TM'] = score_TREND(indicatori['trend_magnitude'])
     #indicatori['score_technical_POT'] = score_quantile(indicatori['price_over_trend'])
-
-    #GRAHAM
-    indicatori['GRAHAM_SCORE'] = score_graham(indicatori['price_over_graham'])
-
 
     indicatori['DIVIDEND_SCORE']       = indicatori.filter(like='score_dividend_').mean(axis=1)
     indicatori['LIQUIDITY_SCORE']      = indicatori.filter(like='score_liquidity').mean(axis=1)

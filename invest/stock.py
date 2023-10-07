@@ -63,10 +63,12 @@ class Stock:
         
     def get_name(self):
         try:
-            options = list(map(self.name_option, ['S.p.A.', 'SpA', 'N.V.', 'S.A.', 'S.I.M.p.A.'])) 
+            options = list(map(self.name_option, ['S.p.A.', 'SpA', 'N.V.', 'S.A.', 'S.I.M.p.A.', 'società per azioni'])) 
             name = min(options, key=len)
             if name == self.business_summary:
                 return self.business_summary.split(",")[0]
+            else:
+                return name
         except:
             return self.code
 
