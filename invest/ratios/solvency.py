@@ -1,6 +1,5 @@
 """Solvency Module"""
-__docformat__ = "google"
-
+import numpy as np
 import pandas as pd
 
 
@@ -57,8 +56,10 @@ def get_interest_coverage_ratio(
     Returns:
         float | pd.Series: The interest coverage ratio value.
     """
-    return (operating_income + depreciation_and_amortization) / interest_expense
-
+    try:
+        return (operating_income + depreciation_and_amortization) / interest_expense
+    except:
+        return np.nan
 
 def get_debt_service_coverage_ratio(
     operating_income: float | pd.Series, current_liabilities: float | pd.Series
@@ -74,7 +75,10 @@ def get_debt_service_coverage_ratio(
     Returns:
         float | pd.Series: The debt service coverage ratio value.
     """
-    return operating_income / current_liabilities
+    try:
+        return operating_income / current_liabilities
+    except:
+        return np.nan
 
 
 def get_equity_multiplier(

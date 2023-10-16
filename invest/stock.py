@@ -17,7 +17,6 @@ OPERATING_CASHFLOW = 'OperatingCashFlow'#"Total Cash From Operating Activities"
 FREE_CASHFLOW = 'FreeCashFlow'
 CASH = 'Cash'
 CASH_AND_EQ = 'CashAndCashEquivalents'
-NET_INCOME = 'NetIncome'
 INTEREST_EXPENSE = 'InterestExpense'
 TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
@@ -251,12 +250,7 @@ class Stock:
     @property
     def PE(self):
         if self.is_last and (self.get_info("trailingPE") is not None):
-            pe_yahoo = float(self.get_info("trailingPE"))
-            pe_raw = self.market_cap/self.net_income
-            if (pe_yahoo > (pe_raw+100)):
-                return pe_raw
-            else:
-                return pe_yahoo
+            return float(self.get_info("trailingPE"))
         else:
             return self.market_cap/self.net_income
 
@@ -264,8 +258,19 @@ class Stock:
     def net_income(self):
         if self.is_last and (self.get_info("netIncomeToCommon") is not None):
             return self.get_info("netIncomeToCommon")
+        elif self.is_last and self.granularity == 'q':
+            try:
+                return self.financials.reset_index()[['NetIncome']].tail(4).sum().values.item()
+            except:
+                return self.net_income_from_pe()
         else:
-            return self.last_before_quot_date(self.financials)[NET_INCOME]
+            try:
+                return self.last_before_quot_date(self.yearly_financials)['NetIncome']
+            except:
+                return self.net_income_from_pe()
+
+    def net_income_from_pe(self):
+        return self.market_cap/self.PE
 
     @property
     def graham_price(self):
@@ -391,7 +396,13 @@ class Stock:
     @property
     def operating_income(self):
         try:
-            return self.last_before_quot_date(self.financials)['OperatingIncome']
+            if self.is_last and (self.granularity == 'q'):
+                try:
+                    return self.quarterly_financials[['OperatingIncome']].tail(4).sum().values.item()
+                except:
+                    self.last_before_quot_date(self.yearly_financials)['OperatingIncome']
+            else:
+                return self.last_before_quot_date(self.yearly_financials)['OperatingIncome']
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -463,8 +474,8 @@ class Stock:
         if self.is_last and (self.get_info("totalDebt") is not None):
             return self.get_info("totalDebt")
         else:
-            return self.last_before_quot_date(self.financials)[['LongTermDebt', 'CurrentLiabilities']].sum()
-
+            return self.last_before_quot_date(self.yearly_financials)[['LongTermDebt', 'CurrentLiabilities']].sum()
+        
     @property
     def net_cash_per_share(self):
         return (self.cash - self.total_debt) / self.n_shares
@@ -554,7 +565,13 @@ class Stock:
         return  self.revenue/self.full_time_employees
     @property
     def earning_per_share(self):
-        return  self.net_income/self.n_shares
+        try:
+            if self.is_last:
+                return self.reference_price/self.PE
+            else:
+                raise ValueError
+        except:
+            return  self.net_income/self.n_shares
 
     @property
     def EPS(self):
@@ -577,14 +594,15 @@ class Stock:
     @property
     def pretax_income(self):
         try:
-            return self.last_before_quot_date(self.financials)['PretaxIncome']
+            return self.last_before_quot_date(self.yearly_financials)['PretaxIncome']
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
+
     @property
     def interest_expense(self):
         try:
-            return self.last_before_quot_date(self.financials)[INTEREST_EXPENSE]
+            return self.last_before_quot_date(self.yearly_financials)[INTEREST_EXPENSE]
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0

@@ -1,9 +1,14 @@
 import pandas as pd
 from invest.scoring import *
 import os
+from invest.loader import load_borsa_italiana_stocks_symbols
+from invest.fundamental_analysis import main_fundamental_indicators
+from invest.technical_analysis import detect_trend
+from invest.scoring import compute_score, get_indicators
+from invest import Stock
+import pandas as pd
+from invest.ratios import liquidity, efficiency, solvency, valuation
 
-last_file = max(list(filter(lambda x : (x.startswith('risultati') and x.endswith('.xlsx')), os.listdir())))
-indicatori = pd.read_excel(last_file)
-indicatori = compute_score(indicatori.set_index('code')).sort_values(by='OVERALL_SCORE', ascending=False)
-indicatori.drop(columns='name')
-compute_score(indicatori.set_index('code'))
+stock = Stock('D.MI')
+trend_magnitude, last_value_trendline = detect_trend(stock.hist.reset_index(),
+                                                         verbose=1)
