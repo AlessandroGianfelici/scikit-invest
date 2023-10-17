@@ -38,6 +38,7 @@ class Stock:
         self._quarterly_balance_sheet = None
         self._n_shares = None
         self._quarterly_cashflow = None
+        self._net_income = None
         self.is_last = (quot_date is None)
         self.granularity =granularity
         self.quot_date = quot_date or datetime.now()
@@ -59,10 +60,16 @@ class Stock:
         if self._name is None:
             self._name = self.get_name()
         return self._name
-        
+
     def get_name(self):
         try:
-            options = list(map(self.name_option, ['S.p.A.', 'SpA', 'N.V.', 'S.A.', 'S.I.M.p.A.', 'società per azioni'])) 
+            options = list(map(self.name_option, ['S.p.A.',
+                                                  'SpA',
+                                                  'N.V.',
+                                                  'S.A.',
+                                                  'S.I.M.p.A.',
+                                                  'società per azioni',
+                                                  'Société anonyme']))
             name = min(options, key=len)
             if name == self.business_summary:
                 return self.business_summary.split(",")[0]
@@ -87,7 +94,9 @@ class Stock:
                 logger.warn("WARNING: no quarterly data found! Using yearly financials")
                 self._financials = self.ticker.all_financial_data(frequency='a').set_index('asOfDate')
             self._financials['TotalAssetsBeginning'] = self._financials['TotalAssets'].shift()
-            self._financials['InventoryBeginning'] = self._financials['Inventory'].shift()
+            try:
+                self._financials['InventoryBeginning'] = self._financials['Inventory'].shift()
+            except: pass
             self._financials['AccountsReceivableBeginning'] = self._financials['AccountsReceivable'].shift()
         return self._financials.fillna(method='ffill')
 
@@ -254,23 +263,35 @@ class Stock:
         else:
             return self.market_cap/self.net_income
 
-    @property
-    def net_income(self):
+    def _set_net_income(self):
         if self.is_last and (self.get_info("netIncomeToCommon") is not None):
             return self.get_info("netIncomeToCommon")
         elif self.is_last and self.granularity == 'q':
             try:
                 return self.financials.reset_index()[['NetIncome']].tail(4).sum().values.item()
             except:
-                return self.net_income_from_pe()
+                if self.is_last and (self.get_info("trailingPE") is not None):
+                    return self.net_income_from_pe()
+                else:
+                    return self.net_income_from_roe()
         else:
             try:
                 return self.last_before_quot_date(self.yearly_financials)['NetIncome']
             except:
                 return self.net_income_from_pe()
 
+    @property
+    def net_income(self):
+        if self._net_income is None:
+            self._net_income = self._set_net_income()
+        return self._net_income
+
+
     def net_income_from_pe(self):
         return self.market_cap/self.PE
+
+    def net_income_from_roe(self):
+        return self.ROE*self.market_cap
 
     @property
     def graham_price(self):
@@ -471,11 +492,11 @@ class Stock:
 
     @property
     def total_debt(self):
-        if self.is_last and (self.get_info("totalDebt") is not None):
+        if self.is_last and (self.get_info("totalDebt") is not None) and not isinstance(self.get_info("totalDebt"), dict):
             return self.get_info("totalDebt")
         else:
             return self.last_before_quot_date(self.yearly_financials)[['LongTermDebt', 'CurrentLiabilities']].sum()
-        
+
     @property
     def net_cash_per_share(self):
         return (self.cash - self.total_debt) / self.n_shares
@@ -499,7 +520,7 @@ class Stock:
 
     @property
     def last_dividend(self):
-        if self.is_last and (self.get_info("dividendRate") is not None):
+        if self.is_last and (self.get_info("dividendRate") is not None) and not (isinstance(self.get_info("dividendRate"), dict)):
             return  self.get_info("dividendRate")
         elif len(self.annual_dividends):
             return self.annual_dividends.tail(1)['Dividends'].item()
@@ -513,7 +534,7 @@ class Stock:
 
     @property
     def operating_cash_flow(self):
-        if self.is_last and (self.get_info("operatingCashflow") is not None) :
+        if self.is_last and (self.get_info("operatingCashflow") is not None) and not isinstance(self.get_info("operatingCashflow"), dict):
             return float(self.get_info("operatingCashflow"))
         else:
             return float( self.last_before_quot_date(self.cashflow)[OPERATING_CASHFLOW])
@@ -551,10 +572,10 @@ class Stock:
 
     @property
     def revenue(self):
-        if self.is_last and (self.get_info("totalRevenue") is not None):
+        if self.is_last and (self.get_info("totalRevenue") is not None) and not isinstance(self.get_info("totalRevenue"), dict):
             return self.get_info("totalRevenue")
         else:
-            return self.last_before_quot_date(self.financials)["TotalRevenue"]
+            return self.last_before_quot_date(self.yearly_financials)["TotalRevenue"]
 
     @property
     def net_income_per_employee(self):
