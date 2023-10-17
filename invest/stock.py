@@ -258,22 +258,24 @@ class Stock:
 
     @property
     def PE(self):
-        if self.is_last and (self.get_info("trailingPE") is not None):
+        if self.is_last and (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
             return float(self.get_info("trailingPE"))
         else:
             return self.market_cap/self.net_income
 
     def _set_net_income(self):
-        if self.is_last and (self.get_info("netIncomeToCommon") is not None):
+        if self.is_last and (self.get_info("netIncomeToCommon") is not None) and not isinstance(self.get_info("netIncomeToCommon"), dict):
             return self.get_info("netIncomeToCommon")
         elif self.is_last and self.granularity == 'q':
             try:
                 return self.financials.reset_index()[['NetIncome']].tail(4).sum().values.item()
             except:
-                if self.is_last and (self.get_info("trailingPE") is not None):
+                if self.is_last and (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
                     return self.net_income_from_pe()
-                else:
+                elif self.is_last and (self.get_info("returnOnEquity") is not None) and not isinstance(self.get_info("returnOnEquity"), dict):
                     return self.net_income_from_roe()
+                else:
+                    return np.nan
         else:
             try:
                 return self.last_before_quot_date(self.yearly_financials)['NetIncome']
