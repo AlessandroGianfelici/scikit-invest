@@ -77,7 +77,7 @@ def get_indicators(stock):
 
 def score_DIVHIST(years_of_payments):
     tmp = pd.DataFrame()
-    tmp['score_dividend_HISTORY'] = years_of_payments.apply(lambda x : max(x, 20))/4
+    tmp['score_dividend_HISTORY'] = years_of_payments.apply(lambda x : min(x, 20))/4
     return tmp['score_dividend_HISTORY']
 
 def score_DIVCONSISTENCY(fraction_of_payments):

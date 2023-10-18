@@ -65,6 +65,10 @@ class Stock:
         try:
             options = list(map(self.name_option, ['S.p.A.',
                                                   'SpA',
+                                                  'Spa',
+                                                  'S.P.A.',
+                                                  'Sa',
+                                                  'S.p.A.',
                                                   'N.V.',
                                                   'S.A.',
                                                   'S.I.M.p.A.',
