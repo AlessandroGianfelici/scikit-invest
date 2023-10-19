@@ -2,6 +2,7 @@ import pandas as pd
 from invest.fundamental_analysis import main_fundamental_indicators
 from invest.technical_analysis import detect_trend
 import piecewise_regression
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
 def compute_score(indicatori : pd.DataFrame):
@@ -16,22 +17,21 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_liquidity_QR'] = score_QR(indicatori['Quick Ratio'])
     indicatori['score_liquidity_CASHR'] = score_CR(indicatori['Cash Ratio'])
     indicatori['score_liquidity_CUR'] = score_CR(indicatori['Current Ratio'])
-    indicatori['score_liquidity_OCFR'] = score_CR(indicatori['Operating Cash Flow Ratio'])
-    indicatori['score_liquidity_OCFSR'] = score_CR(indicatori['Operating Cash Flow Sales Ratio'])
-    indicatori['score_liquidity_STCFR'] = score_CR(indicatori['Short Term Coverage Ratio'])
-    indicatori['score_liquidity_WCOMC'] = score_CR(indicatori['Working capital over market cap'])
+    indicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
+    indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
+    indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
+    indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
 
     #EFFICIENCY
-    indicatori['score_efficiency_ATR'] = score_quantile(indicatori['Asset Turnover Ratio'])
-    indicatori.loc[indicatori['sector'] == 'Financial Services', 'score_efficiency_ATR'] == np.nan
+    indicatori['score_efficiency_ATR'] = score_efficiency_ATR(indicatori.copy())
     indicatori['score_efficiency_NIPE'] = score_NIPE(indicatori['Net income per employee'])
 
     #SOLVENCY
-    indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**(-1))
-    indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**(-1))
-    indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'])
-    indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'])
-    indicatori['score_solvency_EM'] = score_quantile(indicatori['Equity Multiplier'])
+    indicatori['score_solvency_DAR'] = score_quantile(1 - indicatori['Debt to Assets Ratio'],  nan_score=np.nan)
+    indicatori['score_solvency_DER'] = score_quantile(1 - indicatori['Debt to Equity Ratio'],  nan_score=np.nan)
+    indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'],  nan_score=np.nan)
+    indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'],  nan_score=np.nan)
+    indicatori['score_solvency_EM'] = score_quantile(1 - indicatori['Equity Multiplier'],  nan_score=np.nan)
     indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=np.nan)
 
     #VALUE
@@ -75,6 +75,22 @@ def get_indicators(stock):
     tmp['score_dividend_DIVTREND'] = score_DIVTREND(stock)
     return tmp
 
+def score_efficiency_ATR(result):
+    sectors = result['sector'].unique()
+    result['score_efficiency_ATR'] = np.nan
+    for sector in sectors:
+        filtered = result.loc[result['sector'] == sector]['Asset Turnover Ratio']
+        result.loc[result['sector'] == sector, 'score_efficiency_ATR'] = 5* MinMaxScaler().fit_transform(filtered.values.reshape(-1, 1))
+    return result['score_efficiency_ATR']
+
+def score_OCFR(value):
+    df = pd.DataFrame()
+    df['Operating Cash Flow Ratio'] = value
+    df['score_liquidity_OCFR'] = 5*df['Operating Cash Flow Ratio']
+    df.loc[df['Operating Cash Flow Ratio'] < 0, 'score_liquidity_OCFR'] = 0
+    df.loc[df['Operating Cash Flow Ratio'] > 1, 'score_liquidity_OCFR'] = 5
+    return df['score_liquidity_OCFR']
+
 def score_DIVHIST(years_of_payments):
     tmp = pd.DataFrame()
     tmp['score_dividend_HISTORY'] = years_of_payments.apply(lambda x : min(x, 20))/4
@@ -82,7 +98,7 @@ def score_DIVHIST(years_of_payments):
 
 def score_DIVCONSISTENCY(fraction_of_payments):
     tmp = pd.DataFrame()
-    tmp['score_dividend_CONSISTENCY'] = 5*fraction_of_payments.apply(lambda x : max(x, 1))
+    tmp['score_dividend_CONSISTENCY'] = 5*fraction_of_payments.apply(lambda x : min(x, 1))
     return tmp['score_dividend_CONSISTENCY']
 
 def score_quantile(value, nan_score=0):

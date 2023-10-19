@@ -61,24 +61,29 @@ class Stock:
             self._name = self.get_name()
         return self._name
 
+    @staticmethod
+    def company_suffixes():
+        suff_list = ['S.p.A.',
+                     'SpA',
+                     'Spa',
+                     'S.P.A.',
+                     'Sa',
+                     'S.p.A.',
+                     'N.V.',
+                     'S.A.',
+                     'S.I.M.p.A.',
+                     'società per azioni',
+                     'Société anonyme']
+        return list(map(lambda x : x + ',', suff_list)) +  list(map(lambda x : x + ' ', suff_list))
+
     def get_name(self):
         try:
-            options = list(map(self.name_option, ['S.p.A. ',
-                                                  'SpA ',
-                                                  'Spa ',
-                                                  'S.P.A. ',
-                                                  'Sa ',
-                                                  'S.p.A. ',
-                                                  'N.V. ',
-                                                  'S.A. ',
-                                                  'S.I.M.p.A. ',
-                                                  'società per azioni ',
-                                                  'Société anonyme ']))
+            options = list(map(self.name_option, self.company_suffixes()))
             name = min(options, key=len)
             if name == self.business_summary:
                 return self.business_summary.split(",")[0]
             else:
-                return name.strip()
+                return name[:-1]
         except:
             return self.code
 
