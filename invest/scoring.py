@@ -300,8 +300,8 @@ def score_NCAPSOP(NCAPSOP):
 def score_DIVTREND(stock):
     try:
         annual_dividends = stock.annual_dividends.loc[stock.annual_dividends['Year']>=2002]
-        ms = piecewise_regression.ModelSelection(annual_dividends['Year'].values,
-                                             annual_dividends['Dividends'].values,
+        ms = piecewise_regression.ModelSelection(annual_dividends['Year'].astype(float).values,
+                                             annual_dividends['Dividends'].astype(float).values,
                                              max_breakpoints=3)
     except:
         return 0
