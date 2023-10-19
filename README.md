@@ -1,4 +1,4 @@
-# pyInvest
+# scikit-invest
 A collection of utilities for investors
 
 ## Usage
