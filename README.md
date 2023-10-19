@@ -1,5 +1,15 @@
 # scikit-invest
-A collection of utilities for investors
+
+This is a free and open source stock screener that I initially developed for my investment decisions. It uses the yahoo finance API to comupte, for each stock, ~30 indicators that are used to compute six scores:
+
+1. VALUE SCORE
+2. LIQUIDITY SCORE
+3. EFFICIENCY SCORE
+4. SOLVENCY SCORE
+5. DIVIDEND SCORE
+6. TECHNICAL SCORE
+
+Then, an overall score is assigned to each stock of a given market. The overall score is the average of the six scores described before.
 
 ## Usage
 As the libraries relies on data downloaded by yahoo finance, it can be used to screen stocks on any market.
@@ -31,7 +41,7 @@ for symbol in symbols['SYMBOL']:
         print(e, e.__doc__)
         pass
 
-compute_score(result.reset_index(drop=1))
+scores = compute_score(result.reset_index(drop=1))
 
 ```
 
@@ -60,13 +70,13 @@ for symbol, name in zip(symbols['Symbol'], symbols['Description']):
         print(e, e.__doc__)
         pass
 
-compute_score(result.reset_index(drop=1))
+scores = compute_score(result.reset_index(drop=1))
 
 ```
 
 ## Feedbacks
 
-Any feedback, improvement/enhancement or issue is welcome in the [issue page](https://github.com/AlessandroGianfelici/hycom_downloader/issues) of the repo.
+Any feedback, improvement/enhancement or issue is welcome in the [issue page](https://github.com/AlessandroGianfelici/scikit-invest/issues) of the repo.
 
 ## Contributing
 
