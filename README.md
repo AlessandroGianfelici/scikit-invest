@@ -64,3 +64,19 @@ compute_score(result.reset_index(drop=1))
 
 ```
 
+## Feedbacks
+
+Any feedback, improvement/enhancement or issue is welcome in the [issue page](https://github.com/AlessandroGianfelici/hycom_downloader/issues) of the repo.
+
+## Contributing
+
+Feel free to fork this repository, modify the code and open any needed pull requests!
+
+## Licence
+
+This repository has a MIT License.
+
+## Support
+As I am a caffeine-fueled programmer, if you want to support my open source projects you can offer me a coffee ;) 
+<p><a href="https://www.buymeacoffee.com/AleGianfelici"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="AleGianfelici" /></a><a href="https://ko-fi.com/alessandrogianfelici"> <img align="left" src="https://cdn.ko-fi.com/cdn/kofi3.png?v=3" height="50" width="210" alt="alessandrogianfelici" /></a></p><br><br>
+
