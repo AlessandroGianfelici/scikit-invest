@@ -78,9 +78,12 @@ def get_indicators(stock):
 def score_efficiency_ATR(result):
     sectors = result['sector'].unique()
     result['score_efficiency_ATR'] = np.nan
-    for sector in sectors:
-        filtered = result.loc[result['sector'] == sector]['Asset Turnover Ratio']
-        result.loc[result['sector'] == sector, 'score_efficiency_ATR'] = 5* MinMaxScaler().fit_transform(filtered.values.reshape(-1, 1))
+    try:
+        for sector in sectors:
+            filtered = result.loc[result['sector'] == sector]['Asset Turnover Ratio']
+            result.loc[result['sector'] == sector, 'score_efficiency_ATR'] = 5* MinMaxScaler().fit_transform(filtered.values.reshape(-1, 1))
+    except:
+        pass
     return result['score_efficiency_ATR']
 
 def score_OCFR(value):
