@@ -107,7 +107,7 @@ class Stock:
                 self._financials['InventoryBeginning'] = self._financials['Inventory'].shift()
             except: pass
             self._financials['AccountsReceivableBeginning'] = self._financials['AccountsReceivable'].shift()
-        return self._financials.fillna(method='ffill')
+        return self._financials.ffill()
 
     @property
     def yearly_financials(self):
@@ -209,7 +209,7 @@ class Stock:
 
     @property
     def PS(self):
-        return self.info['priceToSalesTrailing12Months']
+        return self.get_info('priceToSalesTrailing12Months') or np.nan
 
     @property
     def PB(self):
