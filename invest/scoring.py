@@ -193,21 +193,21 @@ def score_PE(PE):
 def score_QR(qr):
     tmp_df = pd.DataFrame()
     tmp_df['QR'] = qr
-    tmp_df['score_QR'] = 0
-    tmp_df.loc[tmp_df['QR'].isna(), 'score_QR'] = 3
-    tmp_df.loc[(tmp_df['QR'] < 2) &
-               (tmp_df['QR'] > 0) , 'score_QR'] =  2.5*(tmp_df['QR'])
-    tmp_df.loc[tmp_df['QR'] > 2, 'score_QR'] = 5
+    tmp_df['score_QR'] = 0.0
+    tmp_df.loc[tmp_df['QR'].isna(), 'score_QR'] = 3.0
+    tmp_df.loc[(tmp_df['QR'] < 2.0) &
+               (tmp_df['QR'] > 0.0) , 'score_QR'] =  2.5*(tmp_df['QR'])
+    tmp_df.loc[tmp_df['QR'] > 2.0, 'score_QR'] = 5.0
     return tmp_df['score_QR']
 
 def score_CR(qr):
     tmp_df = pd.DataFrame()
     tmp_df['CR'] = qr
-    tmp_df['score_CR'] = 0
-    tmp_df.loc[tmp_df['CR'].isna(), 'score_CR'] = 3
-    tmp_df.loc[(tmp_df['CR'] < 2) &
-               (tmp_df['CR'] > 0) , 'score_CR'] =  2.5*(tmp_df['CR'])
-    tmp_df.loc[tmp_df['CR'] > 2, 'score_CR'] = 5
+    tmp_df['score_CR'] = 0.0
+    tmp_df.loc[tmp_df['CR'].isna(), 'score_CR'] = 3.0
+    tmp_df.loc[(tmp_df['CR'] < 2.0) &
+               (tmp_df['CR'] > 0.0) , 'score_CR'] =  2.5*(tmp_df['CR'])
+    tmp_df.loc[tmp_df['CR'] > 2.0, 'score_CR'] = 5.0
     return tmp_df['score_CR']
 
 

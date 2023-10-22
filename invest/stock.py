@@ -187,7 +187,7 @@ class Stock:
             return pd.pivot_table(dividends,
                                   index="Year",
                                   values="Dividends",
-                                  aggfunc=sum).reset_index()
+                                  aggfunc="sum").reset_index()
         except:
             return pd.DataFrame()
 
