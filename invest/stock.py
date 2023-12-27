@@ -248,10 +248,7 @@ class Stock:
 
     @property
     def stockholder_equity(self):
-        try:
-            return self.last_before_quot_date(self.financials)[TOT_EQUITY]
-        except:
-            return self.total_assets - self.total_liabilities
+        return self.total_assets - self.total_liabilities
 
     @property
     def total_assets(self):
@@ -565,7 +562,10 @@ class Stock:
         if   (self.get_info("operatingCashflow") is not None) and not isinstance(self.get_info("operatingCashflow"), dict):
             return float(self.get_info("operatingCashflow"))
         else:
-            return float( self.last_before_quot_date(self.cashflow)[OPERATING_CASHFLOW])
+            try:
+                return float( self.last_before_quot_date(self.cashflow)[OPERATING_CASHFLOW])
+            except:
+                return np.nan
 
     @property
     def price_to_cash_flow(self):
