@@ -22,10 +22,10 @@ TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
 
 class Stock:
-    def __init__(self, code: str, name: str = None, quot_date=None, granularity='q'):
-        self.code = code
+    def __init__(self, code: str, name: str = None,  granularity='q'):
+        self.code = code.upper()
         self._name = name
-        self.ticker = Ticker(code)
+        self.ticker = Ticker(code.upper())
         self._reference_price = None
         self._hist = None
         self._info = None
@@ -39,9 +39,10 @@ class Stock:
         self._n_shares = None
         self._quarterly_cashflow = None
         self._net_income = None
-        self.is_last = (quot_date is None)
         self.granularity =granularity
-        self.quot_date = quot_date or datetime.now()
+        self.quot_date =  datetime.now()
+        self._last_financial_data = None
+
 
     def name_option(self, key):
         if key in self.business_summary:
@@ -61,6 +62,12 @@ class Stock:
             self._name = self.get_name()
         return self._name
 
+    @property
+    def last_financial_data(self):
+        if self._last_financial_data is None:
+            self._last_financial_data = self.ticker.financial_data[self.code]
+        return self._last_financial_data
+    
     @staticmethod
     def company_suffixes():
         suff_list = ['S.p.A.',
@@ -72,6 +79,7 @@ class Stock:
                      'N.V.',
                      'S.A.',
                      'S.I.M.p.A.',
+                     'SA',
                      'società per azioni',
                      'Société anonyme']
         return list(map(lambda x : x + ',', suff_list)) +  list(map(lambda x : x + ' ', suff_list))
@@ -166,10 +174,6 @@ class Stock:
                 self._hist['Date'] = self._hist['Date'].dt.tz_localize(None)
             except: pass
             self._hist = self._hist.set_index('Date')
-            try:
-                self._hist = self._hist.loc[pd.to_datetime(self._hist.index) <= pd.to_datetime(self.quot_date)]
-            except:
-                pass
         return self._hist
 
     @property
@@ -213,11 +217,15 @@ class Stock:
 
     @property
     def PB(self):
-        return self.reference_price/ self.book_value
+        try:
+            return self.ticker.key_stats[self.code]['priceToBook']
+        except Exception as e:
+            print(e, e.__doc__)
+            return self.reference_price/ self.book_value
 
     @property
     def market_cap(self):
-        if self.is_last and (self.get_info("marketCap") is not None):
+        if (self.get_info("marketCap") is not None):
             return float(self.get_info("marketCap"))
         else:
             return self.reference_price * self.n_shares
@@ -267,21 +275,33 @@ class Stock:
 
     @property
     def PE(self):
-        if self.is_last and (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
+        if (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
             return float(self.get_info("trailingPE"))
         else:
             return self.market_cap/self.net_income
 
+    @property
+    def revenue_per_share(self):
+        return self.revenue/self.n_shares
+
+    @property
+    def current_ratio(self):
+        try:
+            return self.last_financial_data['currentRatio']
+        except:
+            return liquidity.get_current_ratio(self.current_assets,
+                                               self.current_liabilities)
+
     def _set_net_income(self):
-        if self.is_last and (self.get_info("netIncomeToCommon") is not None) and not isinstance(self.get_info("netIncomeToCommon"), dict):
+        if (self.get_info("netIncomeToCommon") is not None) and not isinstance(self.get_info("netIncomeToCommon"), dict):
             return self.get_info("netIncomeToCommon")
-        elif self.is_last and self.granularity == 'q':
+        elif self.granularity == 'q':
             try:
                 return self.financials.reset_index()[['NetIncome']].tail(4).sum().values.item()
             except:
-                if self.is_last and (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
+                if   (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
                     return self.net_income_from_pe()
-                elif self.is_last and (self.get_info("returnOnEquity") is not None) and not isinstance(self.get_info("returnOnEquity"), dict):
+                elif   (self.get_info("returnOnEquity") is not None) and not isinstance(self.get_info("returnOnEquity"), dict):
                     return self.net_income_from_roe()
                 else:
                     return np.nan
@@ -314,22 +334,22 @@ class Stock:
 
     @property
     def ROA(self):
-        if self.is_last and (self.get_info("returnOnAssets") is not None):
+        if   (self.get_info("returnOnAssets") is not None):
             return float(self.get_info("returnOnAssets"))
         else:
             return self.net_income/self.total_assets
 
     @property
-    def book_value(self):
-        if self.is_last:
+    def book_value(self):    
+        try:
+            return float(self.get_info("bookValue"))
+        except Exception as e:
+            print(f"{e}: {e.__doc__}")
             try:
-                return float(self.get_info("bookValue"))
-            except Exception as e:
-                print(f"{e}: {e.__doc__}")
+                return self.ticker.key_stats[self.code]['bookValue']
+            except:
                 return self.stockholder_equity/self.n_shares
-        else:
-            return self.stockholder_equity/self.n_shares
-
+    
     @property
     def ROE(self):
         return self.return_on_equity
@@ -347,15 +367,12 @@ class Stock:
 
     @property
     def return_on_equity(self):
-        if self.is_last:
-            try:
-                return float(self.get_info("returnOnEquity"))
-            except Exception as e:
-                logger.warn(f'{e} : {e.__doc__}')
-                return self.net_income/self.stockholder_equity
-        else:
+        try:
+           return float(self.get_info("returnOnEquity"))
+        except Exception as e:
+            logger.warn(f'{e} : {e.__doc__}')
             return self.net_income/self.stockholder_equity
-
+    
     @property
     def inventory_begin(self):
         try:
@@ -428,7 +445,7 @@ class Stock:
     @property
     def operating_income(self):
         try:
-            if self.is_last and (self.granularity == 'q'):
+            if   (self.granularity == 'q'):
                 try:
                     return self.quarterly_financials[['OperatingIncome']].tail(4).sum().values.item()
                 except:
@@ -503,7 +520,7 @@ class Stock:
 
     @property
     def total_debt(self):
-        if self.is_last and (self.get_info("totalDebt") is not None) and not isinstance(self.get_info("totalDebt"), dict):
+        if   (self.get_info("totalDebt") is not None) and not isinstance(self.get_info("totalDebt"), dict):
             return self.get_info("totalDebt")
         else:
             return self.last_before_quot_date(self.yearly_financials)[['LongTermDebt', 'CurrentLiabilities']].sum()
@@ -514,7 +531,7 @@ class Stock:
 
     @property
     def cash(self):
-        if self.is_last and (self.get_info("totalCash") is not None):
+        if   (self.get_info("totalCash") is not None):
             return self.get_info("totalCash")
         else:
             try:
@@ -531,7 +548,7 @@ class Stock:
 
     @property
     def last_dividend(self):
-        if self.is_last and (self.get_info("dividendRate") is not None) and not (isinstance(self.get_info("dividendRate"), dict)):
+        if   (self.get_info("dividendRate") is not None) and not (isinstance(self.get_info("dividendRate"), dict)):
             return  self.get_info("dividendRate")
         elif len(self.annual_dividends):
             return self.annual_dividends.tail(1)['Dividends'].item()
@@ -545,7 +562,7 @@ class Stock:
 
     @property
     def operating_cash_flow(self):
-        if self.is_last and (self.get_info("operatingCashflow") is not None) and not isinstance(self.get_info("operatingCashflow"), dict):
+        if   (self.get_info("operatingCashflow") is not None) and not isinstance(self.get_info("operatingCashflow"), dict):
             return float(self.get_info("operatingCashflow"))
         else:
             return float( self.last_before_quot_date(self.cashflow)[OPERATING_CASHFLOW])
@@ -564,10 +581,7 @@ class Stock:
     @property
     def free_cash_flow(self):
         try:
-            if self.is_last:
-                return float(self.get_info("freeCashflow"))
-            else:
-                raise TypeError
+            return float(self.get_info("freeCashflow"))
         except:
             try:
                 return self.last_before_quot_date(self.financials)[FREE_CASHFLOW]
@@ -583,7 +597,7 @@ class Stock:
 
     @property
     def revenue(self):
-        if self.is_last and (self.get_info("totalRevenue") is not None) and not isinstance(self.get_info("totalRevenue"), dict):
+        if   (self.get_info("totalRevenue") is not None) and not isinstance(self.get_info("totalRevenue"), dict):
             return self.get_info("totalRevenue")
         else:
             return self.last_before_quot_date(self.yearly_financials)["TotalRevenue"]
@@ -595,13 +609,11 @@ class Stock:
     @property
     def revenue_per_employee(self):
         return  self.revenue/self.full_time_employees
+    
     @property
     def earning_per_share(self):
         try:
-            if self.is_last:
-                return self.reference_price/self.PE
-            else:
-                raise ValueError
+            return self.reference_price/self.PE
         except:
             return  self.net_income/self.n_shares
 
@@ -618,7 +630,7 @@ class Stock:
         try:
             return self.last_before_quot_date(self.quarterly_financials)[EBIT]
         except:
-            if self.is_last and (EBIT in self.financials.columns):
+            if   (EBIT in self.financials.columns):
                 return self.last_before_quot_date(self.financials)[EBIT]
             else:
                 return self.pretax_income + self.interest_expense
