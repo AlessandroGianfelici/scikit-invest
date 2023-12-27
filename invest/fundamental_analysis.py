@@ -33,8 +33,7 @@ def main_fundamental_indicators(stock):
                                                     stock.marketable_securities,
                                                     stock.current_liabilities)]
 
-    score["Current Ratio"] = [liquidity.get_current_ratio(stock.current_assets,
-                                                          stock.current_liabilities)]
+    score["Current Ratio"] = [stock.current_ratio]
 
     score["Operating Cash Flow Ratio"] = [liquidity.get_operating_cash_flow_ratio(stock.operating_cash_flow,
                                                                                   stock.current_liabilities)]
