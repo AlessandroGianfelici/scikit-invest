@@ -1,6 +1,6 @@
 """Liquidity Module"""
 __docformat__ = "google"
-
+import numpy as np
 import pandas as pd
 
 
@@ -20,7 +20,10 @@ def get_current_ratio(
     Returns:
         float | pd.Series: The current ratio value.
     """
-    return current_assets / current_liabilities
+    try:
+        return current_assets / current_liabilities
+    except:
+        return np.nan
 
 
 def get_quick_ratio(
@@ -44,10 +47,13 @@ def get_quick_ratio(
     Returns:
         float | pd.Series: The quick ratio value.
     """
-    return (
+
+    try:
+        return (
         cash_and_equivalents + marketable_securities + accounts_receivable
     ) / current_liabilities
-
+    except:
+        return np.nan
 
 def get_cash_ratio(
     cash_and_equivalents: pd.Series,
@@ -66,7 +72,10 @@ def get_cash_ratio(
     Returns:
         float | pd.Series: The cash ratio value.
     """
-    return (cash_and_equivalents + marketable_securities) / current_liabilities
+    try:
+        return (cash_and_equivalents + marketable_securities) / current_liabilities
+    except:
+        return np.nan
 
 
 def get_working_capital(
@@ -100,7 +109,10 @@ def get_operating_cash_flow_ratio(
     Returns:
         float | pd.Series: The operating cash flow ratio value.
     """
-    return operating_cash_flow / current_liabilities
+    try:
+        return operating_cash_flow / current_liabilities
+    except:
+        return np.nan
 
 
 def get_operating_cash_flow_sales_ratio(
@@ -117,7 +129,11 @@ def get_operating_cash_flow_sales_ratio(
     Returns:
         float | pd.Series: The operating cash flow to sales ratio value.
     """
-    return operating_cash_flow / revenue
+    try:
+        return operating_cash_flow / revenue
+    except:
+        return np.nan
+
 
 
 def get_short_term_coverage_ratio(
@@ -139,4 +155,7 @@ def get_short_term_coverage_ratio(
     Returns:
         float | pd.Series: The short term coverage ratio value.
     """
-    return operating_cash_flow / (accounts_receivable + inventory - accounts_payable)
+    try:
+        return operating_cash_flow / (accounts_receivable + inventory - accounts_payable)
+    except:
+        return np.nan
