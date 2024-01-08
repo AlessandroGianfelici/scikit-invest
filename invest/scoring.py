@@ -14,17 +14,17 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_dividend_CONSISTENCY'] = score_DIVCONSISTENCY(indicatori['Dividend Consistency'])
 
     #LIQUIDITY
-    indicatori['score_liquidity_QR'] = score_QR(indicatori['Quick Ratio'])
-    indicatori['score_liquidity_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
-    indicatori['score_liquidity_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
-    indicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
-    indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
-    indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
-    indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
+    indicatori['score_value_QR'] = score_QR(indicatori['Quick Ratio'])
+    indicatori['score_value_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
+    indicatori['score_value_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
+    indicatori['score_value_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
+    indicatori['score_value_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
+    indicatori['score_value_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
+    indicatori['score_value_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
 
     #EFFICIENCY
-    indicatori['score_efficiency_ATR'] = score_efficiency_ATR(indicatori.copy())
-    indicatori['score_efficiency_NIPE'] = score_NIPE(indicatori['Net income per employee'])
+    indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
+    indicatori['score_value_NIPE'] = score_NIPE(indicatori['Net income per employee'])
 
     #SOLVENCY
     indicatori['score_solvency_DAR'] = score_quantile(1 - indicatori['Debt to Assets Ratio'],  nan_score=np.nan)
@@ -51,8 +51,8 @@ def compute_score(indicatori : pd.DataFrame):
     #indicatori['score_technical_POT'] = score_quantile(indicatori['price_over_trend'])
 
     indicatori['DIVIDEND_SCORE']       = indicatori.filter(like='score_dividend_').mean(axis=1)
-    indicatori['LIQUIDITY_SCORE']      = indicatori.filter(like='score_liquidity').mean(axis=1)
-    indicatori['EFFICIENCY_SCORE']     = indicatori.filter(like='score_efficiency').mean(axis=1)
+    #indicatori['LIQUIDITY_SCORE']      = indicatori.filter(like='score_liquidity').mean(axis=1)
+    #indicatori['EFFICIENCY_SCORE']     = indicatori.filter(like='score_efficiency').mean(axis=1)
     indicatori['SOLVENCY_SCORE']       = indicatori.filter(like='score_solvency_').mean(axis=1)
     indicatori['VALUE_SCORE']          = indicatori.filter(like='score_value_').mean(axis=1)
     indicatori['TECHNICAL_SCORE']      = indicatori.filter(like='score_technical_').mean(axis=1)
