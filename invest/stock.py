@@ -70,7 +70,7 @@ class Stock:
     
     @staticmethod
     def company_suffixes():
-        suff_list = ['S.p.A.',
+        suff_list = ['S.p.A',
                      'SpA',
                      'Spa',
                      'S.P.A.',
