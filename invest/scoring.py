@@ -24,14 +24,14 @@ def compute_score(indicatori : pd.DataFrame):
 
     #EFFICIENCY
     indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
-    indicatori['score_value_NIPE'] = score_NIPE(indicatori['Net income per employee'])
+    indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
 
     #SOLVENCY
-    indicatori['score_solvency_DAR'] = score_quantile(1 - indicatori['Debt to Assets Ratio'],  nan_score=np.nan)
-    indicatori['score_solvency_DER'] = score_quantile(1 - indicatori['Debt to Equity Ratio'],  nan_score=np.nan)
+    indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**-1,  nan_score=np.nan)
+    indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**-1,  nan_score=np.nan)
     indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'],  nan_score=np.nan)
     indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'],  nan_score=np.nan)
-    indicatori['score_solvency_EM'] = score_quantile(1 - indicatori['Equity Multiplier'],  nan_score=np.nan)
+    indicatori['score_solvency_EM'] = score_quantile(indicatori['Equity Multiplier']**-1,  nan_score=np.nan)
     indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=np.nan)
 
     #VALUE
@@ -42,25 +42,24 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_value_NCAPSOP'] = score_NCAPSOP(indicatori['Net current asset per share over price'])
     indicatori['score_value_ROCE'] = score_ROCE(indicatori['ROCE'])
     indicatori['score_value_EPS'] = score_EPS(indicatori['EPS over price'])
-    indicatori['score_value_BVS'] = score_quantile(indicatori['Book Value per Share'])
-    indicatori['score_value_PFC'] = score_quantile(indicatori['Price to free cash flow']**-1, nan_score = np.nan)
+    indicatori['score_value_BVS'] = score_quantile((indicatori['Book Value per Share'] - indicatori['Reference Price'])/indicatori['Reference Price'])
+    indicatori['score_value_PFCF'] = score_price_to_free_cashflow(indicatori['Price to free cash flow'])
     indicatori['score_value_graham'] = score_graham(indicatori['price_over_graham'])
 
     #TECHNICAL
-    indicatori['score_technical_TM'] = score_TREND(indicatori['trend_magnitude'])
-    #indicatori['score_technical_POT'] = score_quantile(indicatori['price_over_trend'])
-
-    #indicatori['DIVIDEND_SCORE']       = indicatori.filter(like='score_dividend_').mean(axis=1)
-    #indicatori['LIQUIDITY_SCORE']      = indicatori.filter(like='score_liquidity').mean(axis=1)
-    #indicatori['EFFICIENCY_SCORE']     = indicatori.filter(like='score_efficiency').mean(axis=1)
-    #indicatori['SOLVENCY_SCORE']       = indicatori.filter(like='score_solvency_').mean(axis=1)
-    #indicatori['VALUE_SCORE']          = indicatori.filter(like='score_value_').mean(axis=1)
-    #indicatori['TECHNICAL_SCORE']      = indicatori.filter(like='score_technical_').mean(axis=1)
+    indicatori['score_trend'] = score_TREND(indicatori['trend_magnitude'])
 
     indicatori['OVERALL_SCORE'] =  indicatori.filter(like='score_').mean(axis=1)
 
     return indicatori.sort_values(by='OVERALL_SCORE', ascending=False)
 
+def score_price_to_free_cashflow(value):
+    tmp = pd.DataFrame()
+    tmp['Price to free cash flow'] = value
+    tmp['score_value_PFCF'] = None
+    tmp.loc[tmp['Price to free cash flow'] <= 0, 'score_value_PFCF'] = 0
+    tmp.loc[tmp['Price to free cash flow'] > 0, 'score_value_PFCF'] = score_quantile(tmp.loc[tmp['Price to free cash flow'] > 0]['Price to free cash flow'])
+    return tmp['score_value_PFCF']
 
 def get_indicators(stock):
     trend_magnitude, last_value_trendline = detect_trend(stock.hist.reset_index(),
@@ -71,7 +70,7 @@ def get_indicators(stock):
     tmp['price_over_trend'] = (tmp['Reference Price'])/last_value_trendline
     tmp['sector'] = stock.get_info('sector')
     tmp['description'] = stock.get_info('longBusinessSummary')
-    #tmp['#div_past20y'] = years_of_dividend_payments(stock)
+    tmp['#div_past20y'] = years_of_dividend_payments(stock)
     tmp['score_dividend_DIVTREND'] = score_DIVTREND(stock)
     return tmp
 
@@ -111,7 +110,7 @@ def score_DIVCONSISTENCY(fraction_of_payments):
 def score_quantile(value, nan_score=0):
     tmp = pd.DataFrame()
     tmp['value'] = value
-    soglia_5 = tmp['value'].quantile(0.9)
+    soglia_5 = tmp['value'].quantile(0.85)
     tmp['score'] = None
     tmp.loc[tmp['value'].isna(), 'score'] = nan_score
     tmp.loc[(tmp['value'] < 0), 'score'] = 0
@@ -240,23 +239,6 @@ def score_TREND(trend):
     tmp_df['score_TREND'] = 0
     tmp_df.loc[(tmp_df['TREND'] > 0), 'score_TREND'] = 5
     return tmp_df['score_TREND']
-
-
-def score_NIPE(IPE):
-    tmp_df = pd.DataFrame()
-    tmp_df['IPE'] = IPE
-
-    best_decile = tmp_df['IPE'].quantile(0.90)
-
-    tmp_df['score_NIPE'] = None
-    tmp_df.loc[tmp_df['IPE'].isna() | (tmp_df['IPE'] < 0), 'score_NIPE'] = 0
-
-    tmp_df.loc[(tmp_df['IPE'] > 0) &
-               (tmp_df['IPE'] < best_decile), 'score_NIPE'] = 5*tmp_df['IPE']/best_decile
-
-    tmp_df.loc[(tmp_df['IPE'] >= best_decile), 'score_NIPE'] = 5
-
-    return tmp_df['score_NIPE']
 
 def score_EPS(ROE):
     tmp_df = pd.DataFrame()

@@ -80,6 +80,7 @@ class Stock:
                      'S.A.',
                      'S.I.M.p.A.',
                      'SA',
+                     'Corp.',
                      'società per azioni',
                      'Société anonyme']
         return list(map(lambda x : x + ',', suff_list)) +  list(map(lambda x : x + ' ', suff_list))
