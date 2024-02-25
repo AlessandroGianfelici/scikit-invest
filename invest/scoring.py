@@ -50,14 +50,14 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_technical_TM'] = score_TREND(indicatori['trend_magnitude'])
     #indicatori['score_technical_POT'] = score_quantile(indicatori['price_over_trend'])
 
-    indicatori['DIVIDEND_SCORE']       = indicatori.filter(like='score_dividend_').mean(axis=1)
+    #indicatori['DIVIDEND_SCORE']       = indicatori.filter(like='score_dividend_').mean(axis=1)
     #indicatori['LIQUIDITY_SCORE']      = indicatori.filter(like='score_liquidity').mean(axis=1)
     #indicatori['EFFICIENCY_SCORE']     = indicatori.filter(like='score_efficiency').mean(axis=1)
-    indicatori['SOLVENCY_SCORE']       = indicatori.filter(like='score_solvency_').mean(axis=1)
-    indicatori['VALUE_SCORE']          = indicatori.filter(like='score_value_').mean(axis=1)
-    indicatori['TECHNICAL_SCORE']      = indicatori.filter(like='score_technical_').mean(axis=1)
+    #indicatori['SOLVENCY_SCORE']       = indicatori.filter(like='score_solvency_').mean(axis=1)
+    #indicatori['VALUE_SCORE']          = indicatori.filter(like='score_value_').mean(axis=1)
+    #indicatori['TECHNICAL_SCORE']      = indicatori.filter(like='score_technical_').mean(axis=1)
 
-    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='_SCORE').mean(axis=1)
+    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='score_').mean(axis=1)
 
     return indicatori.sort_values(by='OVERALL_SCORE', ascending=False)
 
