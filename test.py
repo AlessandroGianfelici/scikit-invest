@@ -9,6 +9,9 @@ from invest import Stock
 import pandas as pd
 from invest.ratios import liquidity, efficiency, solvency, valuation
 
-stock = Stock('D.MI')
+stock = Stock('ENI.MI')
+main_fundamental_indicators(stock)
+
+
 trend_magnitude, last_value_trendline = detect_trend(stock.hist.reset_index(),
                                                          verbose=1)

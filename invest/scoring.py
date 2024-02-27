@@ -46,8 +46,15 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_value_PFCF'] = score_price_to_free_cashflow(indicatori['Price to free cash flow'])
     indicatori['score_value_graham'] = score_graham(indicatori['price_over_graham'])
 
+    #GROWTH
+    indicatori['score_growth_netincome'] = 5*(indicatori['NetIncome derivative'] > 0).astype(int)
+    indicatori['score_growth_revenue'] = 5*(indicatori['Revenue derivative'] > 0).astype(int)
+    indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
+    indicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
+
     #TECHNICAL
-    indicatori['score_trend'] = score_TREND(indicatori['trend_magnitude'])
+    indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
+    indicatori['score_technical_lttrend'] = score_TREND(indicatori['lt_trend_magnitude'])
 
     indicatori['OVERALL_SCORE'] =  indicatori.filter(like='score_').mean(axis=1)
 
@@ -62,12 +69,22 @@ def score_price_to_free_cashflow(value):
     return tmp['score_value_PFCF']
 
 def get_indicators(stock):
-    trend_magnitude, last_value_trendline = detect_trend(stock.hist.reset_index(),
+    st_trend_magnitude, st_last_value_trendline = detect_trend(stock.hist.reset_index(),
                                                          verbose=0)
+
+    lt_trend_magnitude, lt_last_value_trendline = detect_trend(stock.hist.reset_index(),
+                                                               train_length=252*10,
+                                                         verbose=0)
+    
     tmp = main_fundamental_indicators(stock)
-    tmp['trendline'] = last_value_trendline
-    tmp['trend_magnitude'] = trend_magnitude
-    tmp['price_over_trend'] = (tmp['Reference Price'])/last_value_trendline
+    tmp['st_trendline'] = st_last_value_trendline
+    tmp['st_trend_magnitude'] = st_trend_magnitude
+    tmp['price_over_st_trend'] = (tmp['Reference Price'])/st_last_value_trendline
+    
+    tmp['lt_trendline'] = lt_last_value_trendline
+    tmp['lt_trend_magnitude'] = lt_trend_magnitude
+    tmp['price_over_lt_trend'] = (tmp['Reference Price'])/lt_last_value_trendline
+
     tmp['sector'] = stock.get_info('sector')
     tmp['description'] = stock.get_info('longBusinessSummary')
     tmp['#div_past20y'] = years_of_dividend_payments(stock)
