@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 
 from yahooquery import Ticker
-from invest.ratios import efficiency, liquidity, profitability, solvency, valuation
+from invest.ratios import liquidity
 
 
 logger = logging.getLogger()

@@ -1,5 +1,7 @@
 import pandas as pd
 from invest.ratios import liquidity, efficiency, solvency, valuation
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 def main_fundamental_indicators(stock):
     score = pd.DataFrame()
@@ -99,5 +101,29 @@ def main_fundamental_indicators(stock):
     score['market_cap'] = [stock.market_cap]
     score["Return on Assets"] = [stock.ROA]
 
-    #score['full_object'] = [stock]
+    try:
+        score['NetIncome derivative'] = compute_slope(stock.yearly_financials.NetIncome)
+    except:
+        score['NetIncome derivative'] = 0
+
+    try:
+        score['Revenue derivative'] = compute_slope(stock.yearly_financials.TotalRevenue)
+    except:
+        score['Revenue derivative'] = 0
+
+    try:
+        score['OperatingRevenue derivative'] = compute_slope(stock.yearly_financials.OperatingRevenue)
+    except:
+        score['OperatingRevenue derivative'] = 0
+
+    try:
+        score['TotalAssets derivative'] = compute_slope(stock.yearly_financials.TotalAssets)
+    except:
+        score['TotalAssets derivative'] = 0
     return score
+
+
+def compute_slope(y):
+    X = np.array(range(len(y))).reshape(-1, 1)
+    reg = LinearRegression().fit(X, y)
+    return reg.coef_.item()
