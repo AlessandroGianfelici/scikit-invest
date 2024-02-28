@@ -1,7 +1,6 @@
 import pandas as pd
-from invest.fundamental_analysis import main_fundamental_indicators
+from invest.fundamental_analysis import main_fundamental_indicators, compute_slope
 from invest.technical_analysis import detect_trend
-import piecewise_regression
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
@@ -14,13 +13,13 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_dividend_CONSISTENCY'] = score_DIVCONSISTENCY(indicatori['Dividend Consistency'])
 
     #LIQUIDITY
-    indicatori['score_value_QR'] = score_QR(indicatori['Quick Ratio'])
-    indicatori['score_value_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
-    indicatori['score_value_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
-    indicatori['score_value_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
-    indicatori['score_value_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
-    indicatori['score_value_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
-    indicatori['score_value_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
+    indicatori['score_liquidity_QR'] = score_QR(indicatori['Quick Ratio'])
+    indicatori['score_liquidity_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
+    indicatori['score_liquidity_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
+    indicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
+    indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
+    indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
+    indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
 
     #EFFICIENCY
     indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
@@ -56,9 +55,19 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
     indicatori['score_technical_lttrend'] = score_TREND(indicatori['lt_trend_magnitude'])
 
-    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='score_').mean(axis=1)
+    indicatori['VALUE_SCORE'] =  indicatori.filter(like='score_value').mean(axis=1)
+    indicatori['TECHNICAL_SCORE'] =  indicatori.filter(like='score_technical').mean(axis=1)
+    indicatori['GROWTH_SCORE'] =  indicatori.filter(like='score_growth').mean(axis=1)
+    indicatori['LIQUIDITY_SCORE'] =  indicatori.filter(like='score_liquidity').mean(axis=1)
+    indicatori['SOLVENCY_SCORE'] =  indicatori.filter(like='score_solvency').mean(axis=1)
 
-    return indicatori.sort_values(by='OVERALL_SCORE', ascending=False)
+    indicatori['GRAHAM_SCORE'] =  indicatori['score_value_graham']
+    indicatori['PE_SCORE'] =  indicatori['score_value_PE'] 
+    indicatori['PB_SCORE'] =  indicatori['score_value_PB']
+
+    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='SCORE').mean(axis=1)
+
+    return indicatori.sort_values(by='OVERALL_SCORE', ascending=False).drop(columns=['GRAHAM_SCORE','PE_SCORE','PB_SCORE'])
 
 def score_price_to_free_cashflow(value):
     tmp = pd.DataFrame()
@@ -330,34 +339,6 @@ def score_NCAPSOP(NCAPSOP):
 def score_DIVTREND(stock):
     try:
         annual_dividends = stock.annual_dividends.loc[stock.annual_dividends['Year']>=2002]
-        ms = piecewise_regression.ModelSelection(annual_dividends['Year'].astype(float).values,
-                                             annual_dividends['Dividends'].astype(float).values,
-                                             max_breakpoints=3)
+        return int(compute_slope(annual_dividends['Dividends'].values) > 0)
     except:
         return 0
-    model_selector = pd.DataFrame()
-
-    model_selector['bic'] = [ms.model_summaries[0]['bic'],
-                             ms.model_summaries[1]['bic'],
-                             ms.model_summaries[2]['bic'],
-                             ms.model_summaries[3]['bic']]
-    model_selector = model_selector.dropna()
-    n_breakpoints = model_selector.loc[model_selector['bic'] == min(model_selector['bic'])].index.item()
-
-    try:
-        pw_fit = piecewise_regression.Fit(annual_dividends['Year'].values,
-                                          annual_dividends['Dividends'].values,
-                                          n_breakpoints=n_breakpoints)
-
-        result = pw_fit.get_results()
-        alpha = result['estimates'][f'alpha{1+n_breakpoints}']
-        min_alpha = alpha['confidence_interval'][0]
-        max_alpha = alpha['confidence_interval'][1]
-        if min_alpha > 0:
-            return 5
-        elif (min_alpha < 0) and (max_alpha > 0):
-            return 3
-        elif max_alpha < 0:
-            return 0
-    except:
-        return 3
