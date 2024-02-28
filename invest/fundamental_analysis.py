@@ -120,6 +120,20 @@ def main_fundamental_indicators(stock):
         score['TotalAssets derivative'] = compute_slope(stock.yearly_financials.TotalAssets)
     except:
         score['TotalAssets derivative'] = 0
+
+    try:
+        score['TotalAssets derivative'] = compute_slope(stock.yearly_financials.TotalAssets)
+    except:
+        score['TotalAssets derivative'] = 0
+    try:
+        score['FreeCashFlow derivative'] = compute_slope(stock.yearly_financials.FreeCashFlow)
+    except:
+        score['FreeCashFlow derivative'] = 0
+    score['volatility'] = volatility(stock)
+    score['BUYBACK_SCORE'] = score_buyback(stock)
+    score['n_share'] = stock.n_shares
+    score['n_share_avg4y'] = np.mean(stock.balance_sheet['ShareIssued'].values)
+    
     return score
 
 
@@ -127,3 +141,18 @@ def compute_slope(y):
     X = np.array(range(len(y))).reshape(-1, 1)
     reg = LinearRegression().fit(X, y)
     return reg.coef_.item()
+
+def score_buyback(stock):
+    if stock.n_shares < np.mean(stock.balance_sheet['ShareIssued'].values):
+        return 5
+    elif stock.n_shares == np.mean(stock.balance_sheet['ShareIssued'].values):
+        return 3
+    else:
+        return 0
+
+def volatility(stock):
+    TRADING_DAYS = 252
+    returns = np.log(stock.hist['Close']/stock.hist['Close'].shift(1))
+    returns.fillna(0, inplace=True)
+    volatility = returns.rolling(window=TRADING_DAYS).std()*np.sqrt(TRADING_DAYS)
+    return volatility.tail(1).item()

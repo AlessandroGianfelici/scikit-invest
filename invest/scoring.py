@@ -17,13 +17,14 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_liquidity_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
     indicatori['score_liquidity_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
     indicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
-    indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
-    indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
-    indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
+    #indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
+    #indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
+    #indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
+    indicatori['score_liquidity_MCAP'] = score_quantile(indicatori['market_cap'],  nan_score=np.nan)
 
     #EFFICIENCY
-    indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
-    indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
+    #indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
+    #indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
 
     #SOLVENCY
     indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**-1,  nan_score=np.nan)
@@ -50,10 +51,12 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_growth_revenue'] = 5*(indicatori['Revenue derivative'] > 0).astype(int)
     indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
     indicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
+    indicatori['score_growth_freecashflow'] = 5*(indicatori['FreeCashFlow derivative'] > 0).astype(int)
 
     #TECHNICAL
     indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
     indicatori['score_technical_lttrend'] = score_TREND(indicatori['lt_trend_magnitude'])
+    indicatori['score_technical_volatility'] = score_quantile(-indicatori['volatility'])
 
     indicatori['VALUE_SCORE'] =  indicatori.filter(like='score_value').mean(axis=1)
     indicatori['TECHNICAL_SCORE'] =  indicatori.filter(like='score_technical').mean(axis=1)
