@@ -59,6 +59,7 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_technical_volatility'] = score_quantile(-indicatori['volatility'])
 
     indicatori['VALUE_SCORE'] =  indicatori.filter(like='score_value').mean(axis=1)
+    indicatori['DIVIDEND_SCORE'] =  indicatori.filter(like='score_dividend').mean(axis=1)
     indicatori['TECHNICAL_SCORE'] =  indicatori.filter(like='score_technical').mean(axis=1)
     indicatori['GROWTH_SCORE'] =  indicatori.filter(like='score_growth').mean(axis=1)
     indicatori['LIQUIDITY_SCORE'] =  indicatori.filter(like='score_liquidity').mean(axis=1)
