@@ -26,6 +26,7 @@ class Stock:
         self.code = code.upper()
         self._name = name
         self.ticker = Ticker(code.upper())
+        self._sector = None
         self._reference_price = None
         self._hist = None
         self._info = None
@@ -115,7 +116,9 @@ class Stock:
             try:
                 self._financials['InventoryBeginning'] = self._financials['Inventory'].shift()
             except: pass
-            self._financials['AccountsReceivableBeginning'] = self._financials['AccountsReceivable'].shift()
+            try:
+                self._financials['AccountsReceivableBeginning'] = self._financials['AccountsReceivable'].shift()
+            except: pass
         return self._financials.ffill()
 
     @property
@@ -141,6 +144,12 @@ class Stock:
         if self._quarterly_balance_sheet is None:
             self._quarterly_balance_sheet = self.ticker.balance_sheet(frequency='q').set_index('asOfDate')
         return self._quarterly_balance_sheet
+
+    @property
+    def sector(self):
+        if self._sector is None:
+            self._sector = self.get_info('sector')
+        return self._sector
 
     @property
     def cashflow(self):
@@ -389,7 +398,7 @@ class Stock:
             return self.last_before_quot_date(self.financials)['AccountsReceivable']
         except Exception as e:
             print(f"{e}: {e.__doc__}")
-            return np.nan
+            return 0
 
     @property
     def accounts_receivable_begin(self):
@@ -491,7 +500,10 @@ class Stock:
             return self.last_before_quot_date(self.financials)['CurrentAssets']
         except Exception as e:
             print(f"{e}: {e.__doc__}")
-            return np.nan
+            if self.sector == 'Financial Services':
+                return self.total_assets
+            else:
+                return np.nan
 
     @property
     def net_current_assets(self):
@@ -514,7 +526,10 @@ class Stock:
         try:
             return self.last_before_quot_date(self.financials['CurrentLiabilities'])
         except:
-            return np.nan
+            if self.sector == 'Financial Services':
+                return self.total_liabilities
+            else:
+                return np.nan
 
     @property
     def total_debt(self):
