@@ -98,7 +98,7 @@ def get_indicators(stock):
     tmp['lt_trend_magnitude'] = lt_trend_magnitude
     tmp['price_over_lt_trend'] = (tmp['Reference Price'])/lt_last_value_trendline
 
-    tmp['sector'] = stock.get_info('sector')
+    tmp['sector'] = stock.sector
     tmp['description'] = stock.get_info('longBusinessSummary')
     tmp['#div_past20y'] = years_of_dividend_payments(stock)
     tmp['score_dividend_DIVTREND'] = score_DIVTREND(stock)
