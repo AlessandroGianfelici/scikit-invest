@@ -129,6 +129,12 @@ def main_fundamental_indicators(stock):
         score['FreeCashFlow derivative'] = compute_slope(stock.yearly_financials.FreeCashFlow)
     except:
         score['FreeCashFlow derivative'] = 0
+    try:
+        score['TangibleBookValue  derivative'] = compute_slope(stock.yearly_financials.TangibleBookValue)
+    except:
+        score['TangibleBookValue derivative'] = 0
+
+        
     score['volatility'] = volatility(stock)
     score['BUYBACK_SCORE'] = score_buyback(stock)
     score['n_share'] = stock.n_shares

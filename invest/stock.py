@@ -22,7 +22,7 @@ TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
 
 class Stock:
-    def __init__(self, code: str, name: str = None,  granularity='q'):
+    def __init__(self, code: str, name: str = None,  granularity='a'):
         self.code = code.upper()
         self._name = name
         self.ticker = Ticker(code.upper())
