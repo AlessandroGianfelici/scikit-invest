@@ -21,7 +21,10 @@ def main_fundamental_indicators(stock):
     try:
         N = 2023 - stock.annual_dividends['Year'][0] + 1
         score["Number of Years of Dividends"] = [N]
-        score["Dividend Consistency"] = [len(stock.annual_dividends)/N]
+        if N != 0:
+            score["Dividend Consistency"] = [len(stock.annual_dividends)/N]
+        else:
+            score["Dividend Consistency"] = [0]
     except:
         score["Number of Years of Dividends"] = [0]
         score["Dividend Consistency"] = [0]
