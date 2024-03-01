@@ -52,6 +52,7 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
     indicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
     indicatori['score_growth_freecashflow'] = 5*(indicatori['FreeCashFlow derivative'] > 0).astype(int)
+    indicatori['score_growth_tangiblebookvalue'] = 5*(indicatori['TangibleBookValue derivative'] > 0).astype(int)
 
     #TECHNICAL
     indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
