@@ -131,7 +131,7 @@ def main_fundamental_indicators(stock):
     except:
         score['FreeCashFlow derivative'] = 0
     try:
-        score['TangibleBookValue  derivative'] = compute_slope(stock.yearly_financials.TangibleBookValue)
+        score['TangibleBookValue derivative'] = compute_slope(stock.yearly_financials.TangibleBookValue)
     except:
         score['TangibleBookValue derivative'] = 0
 
