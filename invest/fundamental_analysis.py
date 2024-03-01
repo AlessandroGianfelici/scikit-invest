@@ -7,7 +7,8 @@ def main_fundamental_indicators(stock):
     score = pd.DataFrame()
     score["code"] = [stock.code]
     score["name"] = [stock.name]
-    score["Date"] = [stock.quot_date]
+    score["LastPriceDate"] = [stock.quot_date]
+    score["LastFinancialsDate"] = [max(stock.financials.index)]
 
     score["Reference Price"] = [stock.reference_price]
     score["Graham Price"] = [stock.graham_price]
