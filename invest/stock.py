@@ -10,8 +10,6 @@ from invest.ratios import liquidity
 
 logger = logging.getLogger()
 
-EBIT = 'EBIT'
-ASSETS = "TotalAssets"
 TOTAL_LIAB = "TotalLiabilitiesNetMinorityInterest"
 OPERATING_CASHFLOW = 'OperatingCashFlow'#"Total Cash From Operating Activities"
 FREE_CASHFLOW = 'FreeCashFlow'
@@ -22,7 +20,7 @@ TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
 
 class Stock:
-    def __init__(self, code: str, name: str = None,  granularity='a'):
+    def __init__(self, code: str, name: str = None):
         self.code = code.upper()
         self._name = name
         self.ticker = Ticker(code.upper())
@@ -40,10 +38,14 @@ class Stock:
         self._n_shares = None
         self._quarterly_cashflow = None
         self._net_income = None
-        self.granularity =granularity
         self.quot_date =  datetime.now()
         self._last_financial_data = None
-
+        self._total_assets = None
+        self._total_liabilities = None
+        self._intangible_assets = None
+        
+        self._pretax_income = None
+        self._EBIT = None
 
     def name_option(self, key):
         if key in self.business_summary:
@@ -106,21 +108,11 @@ class Stock:
         return self._info
 
     @property
-    def financials(self):
-        if self._financials is None:
-            self._financials = self.ticker.all_financial_data(frequency=self.granularity).set_index('asOfDate')
-            if (self.granularity == 'q') and (len(self._financials) == 0):
-                logger.warn("WARNING: no quarterly data found! Using yearly financials")
-                self._financials = self.ticker.all_financial_data(frequency='a').set_index('asOfDate')
-            self._financials['TotalAssetsBeginning'] = self._financials['TotalAssets'].shift()
-            try:
-                self._financials['InventoryBeginning'] = self._financials['Inventory'].shift()
-            except: pass
-            try:
-                self._financials['AccountsReceivableBeginning'] = self._financials['AccountsReceivable'].shift()
-            except: pass
-        return self._financials.ffill()
-
+    def sector(self):
+        if self._sector is None:
+            self._sector = self.get_info('sector')
+        return self._sector
+        
     @property
     def yearly_financials(self):
         if self._yearly_financials is None:
@@ -134,7 +126,7 @@ class Stock:
         return self._quarterly_financials
 
     @property
-    def balance_sheet(self):
+    def yearly_balance_sheet(self):
         if self._balance_sheet is None:
             self._balance_sheet = self.ticker.balance_sheet(frequency='a').set_index('asOfDate')
         return self._balance_sheet
@@ -146,13 +138,7 @@ class Stock:
         return self._quarterly_balance_sheet
 
     @property
-    def sector(self):
-        if self._sector is None:
-            self._sector = self.get_info('sector')
-        return self._sector
-
-    @property
-    def cashflow(self):
+    def yearly_cashflow(self):
         if self._cashflow is None:
             self._cashflow = self.ticker.cash_flow(frequency="a").set_index('asOfDate')
         return self._cashflow
@@ -172,7 +158,10 @@ class Stock:
     @property
     def n_shares(self):
         if self._n_shares is None:
-            self._n_shares = self.balance_sheet['ShareIssued'].tail(1).item()
+            self._n_shares = (pd.concat([self.yearly_balance_sheet['ShareIssued'],
+                                        self.quarterly_balance_sheet['ShareIssued']])
+                                .reset_index().sort_values(by='asOfDate').dropna()
+                                .tail(1)['ShareIssued'].item())
         return self._n_shares
 
     @property
@@ -251,10 +240,15 @@ class Stock:
 
     @property
     def intangible_assets(self):
-        try:
-            return self.last_before_quot_date(self.balance_sheet.index)[INTANGIBLE_ASSETS]
-        except:
-            return 0
+        if self._intangible_assets is None:
+            try:
+                self._intangible_assets = (pd.concat([self.yearly_balance_sheet['IntangibleAssets'],
+                                                      self.quarterly_balance_sheet['IntangibleAssets']])
+                                             .reset_index().sort_values(by='asOfDate').dropna()
+                                             .set_index('asOfDate').tail(1)['IntangibleAssets'].item())
+            except:
+                self._intangible_assets = 0
+        return self._intangible_assets
 
     @property
     def stockholder_equity(self):
@@ -262,20 +256,22 @@ class Stock:
 
     @property
     def total_assets(self):
-        try:
-            return self.last_before_quot_date(self.financials['TotalAssets'])
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
+        if self._total_assets is None:
+            self._total_assets = (pd.concat([self.yearly_balance_sheet['TotalAssets'],
+                                             self.quarterly_balance_sheet['TotalAssets']])
+                                    .reset_index().sort_values(by='asOfDate').dropna()
+                                    .set_index('asOfDate').tail(1)['TotalAssets'].item())
+        return self._total_assets
 
     @property
     def total_liabilities(self):
-        try:
-            return self.last_before_quot_date(self.financials[TOTAL_LIAB])
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
-
+        if self._total_liabilities is None:
+            self._total_liabilities = (pd.concat([self.yearly_balance_sheet['TotalLiabilitiesNetMinorityInterest'],
+                                                  self.quarterly_balance_sheet['TotalLiabilitiesNetMinorityInterest']])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['TotalLiabilitiesNetMinorityInterest'].item())
+        return self._total_liabilities
+    
     @property
     def earning_per_share(self):
         return self.net_income/self.market_cap
@@ -302,21 +298,15 @@ class Stock:
     def _set_net_income(self):
         if (self.get_info("netIncomeToCommon") is not None) and not isinstance(self.get_info("netIncomeToCommon"), dict):
             return self.get_info("netIncomeToCommon")
-        elif self.granularity == 'q':
-            try:
-                return self.financials.reset_index()[['NetIncome']].tail(4).sum().values.item()
-            except:
-                if   (self.get_info("trailingPE") is not None) and not isinstance(self.get_info("trailingPE"), dict):
-                    return self.net_income_from_pe()
-                elif   (self.get_info("returnOnEquity") is not None) and not isinstance(self.get_info("returnOnEquity"), dict):
-                    return self.net_income_from_roe()
-                else:
-                    return np.nan
+        elif 'NetIncome' in self.yearly_financials:
+            return (pd.concat([self.annualize_financials(self.quarterly_financials, 'NetIncome'),
+                                  self.yearly_financials['NetIncome'].reset_index()])
+                             .sort_values(by='asOfDate').dropna().tail(1)['NetIncome'].item())
         else:
             try:
-                return self.last_before_quot_date(self.yearly_financials)['NetIncome']
-            except:
                 return self.net_income_from_pe()
+            except:
+                return self.net_income_from_roe()
 
     @property
     def net_income(self):
@@ -326,10 +316,10 @@ class Stock:
 
 
     def net_income_from_pe(self):
-        return self.market_cap/self.PE
+        return self.market_cap/float(self.get_info("trailingPE"))
 
     def net_income_from_roe(self):
-        return self.ROE*self.market_cap
+        return float(self.get_info("returnOnEquity"))*self.market_cap
 
     @property
     def graham_price(self):
@@ -383,7 +373,7 @@ class Stock:
     @property
     def inventory_begin(self):
         try:
-            return self.last_before_quot_date(self.financials)['InventoryBeginning']
+            return self.financials['InventoryBeginning']
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -395,55 +385,40 @@ class Stock:
     @property
     def accounts_receivable(self):
         try:
-            return self.last_before_quot_date(self.financials)['AccountsReceivable']
+            return (pd.concat([self.quarterly_financials['AccountsReceivable'],
+                               self.yearly_financials['AccountsReceivable']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['AccountsReceivable'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
 
     @property
-    def accounts_receivable_begin(self):
-        try:
-            return self.last_before_quot_date(self.financials)['AccountsReceivableBeginning']
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
-
-    @property
-    def accounts_receivable_end(self):
-        return self.accounts_receivable
-
-    @property
     def accounts_payable(self):
         try:
-            return self.last_before_quot_date(self.financials)['AccountsPayable']
+            return (pd.concat([self.quarterly_financials['AccountsPayable'],
+                               self.yearly_financials['AccountsPayable']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['AccountsPayable'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
-            return np.nan
+            return 0
 
     @property
     def total_equity(self):
         try:
-            return self.last_before_quot_date(self.financials)['TotalEquityGrossMinorityInterest']
+            return (pd.concat([self.quarterly_financials['TotalEquityGrossMinorityInterest'],
+                               self.yearly_financials['TotalEquityGrossMinorityInterest']]).reset_index()
+                     .sort_values(by='asOfDate').dropna().tail(1)['TotalEquityGrossMinorityInterest'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
 
-    @property
-    def total_equity_begin(self):
-        try:
-            return self.last_before_quot_date(self.financials.shift())['TotalEquityGrossMinorityInterest']
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
-
-    @property
-    def total_equity_end(self):
-        return self.total_equity
 
     @property
     def cash_and_equivalents(self):
         try:
-            return self.last_before_quot_date(self.financials)['CashAndCashEquivalents']
+            return (pd.concat([self.quarterly_financials['CashAndCashEquivalents'],
+                               self.yearly_financials['CashAndCashEquivalents']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['CashAndCashEquivalents'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -452,13 +427,11 @@ class Stock:
     @property
     def operating_income(self):
         try:
-            if   (self.granularity == 'q'):
-                try:
-                    return self.quarterly_financials[['OperatingIncome']].tail(4).sum().values.item()
-                except:
-                    self.last_before_quot_date(self.yearly_financials)['OperatingIncome']
-            else:
-                return self.last_before_quot_date(self.yearly_financials)['OperatingIncome']
+            return (pd.concat([self.yearly_financials['OperatingIncome'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        'OperatingIncome')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['OperatingIncome'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -466,10 +439,15 @@ class Stock:
     @property
     def depreciation_and_amortization(self):
         try:
-            if 'DepreciationAndAmortization' in self.financials.columns:
-                return self.last_before_quot_date(self.financials)['DepreciationAndAmortization']
+            if 'DepreciationAndAmortization' in self.yearly_financials.columns:
+                label = 'DepreciationAndAmortization'
             else:
-                return self.last_before_quot_date(self.financials)['DepreciationAmortizationDepletion']
+                label = 'DepreciationAmortizationDepletion'
+            return (pd.concat([self.yearly_financials[label].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        label)])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)[label].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -477,27 +455,19 @@ class Stock:
     @property
     def marketable_securities(self):
         try:
-            return self.last_before_quot_date(self.financials)['AvailableForSaleSecurities']
+            return (pd.concat([self.quarterly_financials['AvailableForSaleSecurities'],
+                               self.yearly_financials['AvailableForSaleSecurities']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['AvailableForSaleSecurities'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
 
     @property
-    def total_assets_begin(self):
-        try:
-            return self.last_before_quot_date(self.financials)['TotalAssetsBeginning']
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
-
-    @property
-    def total_assets_end(self):
-        return self.total_assets
-
-    @property
     def current_assets(self):
         try:
-            return self.last_before_quot_date(self.financials)['CurrentAssets']
+            return (pd.concat([self.quarterly_financials['CurrentAssets'],
+                               self.yearly_financials['CurrentAssets']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['CurrentAssets'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             if self.sector == 'Financial Services':
@@ -512,7 +482,9 @@ class Stock:
     @property
     def inventory(self):
         try:
-            return self.last_before_quot_date(self.financials)["Inventory"]
+            return (pd.concat([self.quarterly_financials['Inventory'],
+                               self.yearly_financials['Inventory']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['Inventory'].item())
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0 #Insurance and banks do not have inventory
@@ -524,7 +496,9 @@ class Stock:
     @property
     def current_liabilities(self):
         try:
-            return self.last_before_quot_date(self.financials['CurrentLiabilities'])
+            return (pd.concat([self.quarterly_financials['CurrentLiabilities'],
+                               self.yearly_financials['CurrentLiabilities']]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)['CurrentLiabilities'].item())
         except:
             if self.sector == 'Financial Services':
                 return self.total_liabilities
@@ -536,7 +510,13 @@ class Stock:
         if   (self.get_info("totalDebt") is not None) and not isinstance(self.get_info("totalDebt"), dict):
             return self.get_info("totalDebt")
         else:
-            return self.last_before_quot_date(self.yearly_financials)[['LongTermDebt', 'CurrentLiabilities']].sum()
+            return self.long_term_debt + self.current_liabilities
+
+    @property
+    def long_term_debt(self):
+        return (pd.concat([self.quarterly_financials['LongTermDebt'],
+                           self.yearly_financials['LongTermDebt']]).reset_index()
+                  .sort_values(by='asOfDate').dropna().tail(1)['LongTermDebt'].item())
 
     @property
     def net_cash_per_share(self):
@@ -547,10 +527,16 @@ class Stock:
         if   (self.get_info("totalCash") is not None):
             return self.get_info("totalCash")
         else:
-            try:
-                return self.last_before_quot_date(self.financials)[CASH]
-            except:
-                return self.last_before_quot_date(self.financials)[CASH_AND_EQ]
+            if 'Cash' in self.yearly_financials.columns:
+                label = 'Cash'
+            elif 'CashAndCashEquivalents' in self.yearly_financials.columns:
+                label = 'CashAndCashEquivalents'
+            else: return np.nan
+            return  (pd.concat([self.yearly_financials[label].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        label)])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)[label].item())
 
     @property
     def payout_ratio(self):
@@ -579,7 +565,11 @@ class Stock:
             return float(self.get_info("operatingCashflow"))
         else:
             try:
-                return float( self.last_before_quot_date(self.cashflow)[OPERATING_CASHFLOW])
+                return (pd.concat([self.yearly_financials['OperatingCashFlow'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        'OperatingCashFlow')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['OperatingCashFlow'].item())
             except:
                 return np.nan
 
@@ -600,7 +590,11 @@ class Stock:
             return float(self.get_info("freeCashflow"))
         except:
             try:
-                return self.last_before_quot_date(self.financials)[FREE_CASHFLOW]
+                return (pd.concat([self.yearly_financials['FreeCashFlow'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        'FreeCashFlow')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['FreeCashFlow'].item())
             except:
                 try:
                     return self.operating_cash_flow - self.capital_expenditures
@@ -616,7 +610,11 @@ class Stock:
         if   (self.get_info("totalRevenue") is not None) and not isinstance(self.get_info("totalRevenue"), dict):
             return self.get_info("totalRevenue")
         else:
-            return self.last_before_quot_date(self.yearly_financials)["TotalRevenue"]
+            return (pd.concat([self.yearly_financials['TotalRevenue'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        'TotalRevenue')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['TotalRevenue'].item())
 
     @property
     def net_income_per_employee(self):
@@ -643,21 +641,25 @@ class Stock:
 
     @property
     def EBIT(self):
-        try:
-            return self.last_before_quot_date(self.quarterly_financials)[EBIT]
-        except:
-            if   (EBIT in self.financials.columns):
-                return self.last_before_quot_date(self.financials)[EBIT]
-            else:
-                return self.pretax_income + self.interest_expense
+        if self._EBIT is None:
+            try:
+                self._EBIT = (pd.concat([self.annualize_financials(self.quarterly_financials, 'EBIT'),
+                                         self.yearly_financials['EBIT'].reset_index()])
+                                .sort_values(by='asOfDate').dropna().tail(1)['EBIT'].item())
+            except:
+                logger.warning('EBIT column not found, recomputing from other quantities')
+                self._EBIT = self.pretax_income + self.interest_expense
+        return self._EBIT
 
     @property
     def pretax_income(self):
-        try:
-            return self.last_before_quot_date(self.yearly_financials)['PretaxIncome']
-        except Exception as e:
-            print(f"{e}: {e.__doc__}")
-            return np.nan
+        if self._pretax_income is None:
+            self._pretax_income = (pd.concat([self.yearly_financials['PretaxIncome'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials, 
+                                                                        'PretaxIncome')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['PretaxIncome'].item())
+        return self._pretax_income
 
     @property
     def interest_expense(self):
@@ -667,9 +669,12 @@ class Stock:
             print(f"{e}: {e.__doc__}")
             return 0
 
-    @staticmethod
-    def last_before(df, date):
-        return df.loc[pd.to_datetime(df.index) < date].iloc[-1]
-
-    def last_before_quot_date(self, df):
-        return self.last_before(df, self.quot_date)
+    def annualize_financials(self, financials : pd.DataFrame, label : str):
+        period = int(financials['periodType'].unique().item().replace('M', ''))
+        variable = financials[label].dropna()
+        if len(variable) >= int(12/period):
+            results = variable.reset_index().tail(1)
+            results[label] = variable.tail(int(12/period)).sum()
+            return results
+        else:
+            return pd.DataFrame()

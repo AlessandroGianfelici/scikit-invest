@@ -31,7 +31,6 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**-1,  nan_score=np.nan)
     indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'],  nan_score=np.nan)
     indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'],  nan_score=np.nan)
-    indicatori['score_solvency_EM'] = score_quantile(indicatori['Equity Multiplier']**-1,  nan_score=np.nan)
     indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=np.nan)
 
     #VALUE

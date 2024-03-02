@@ -8,7 +8,6 @@ def main_fundamental_indicators(stock):
     score["code"] = [stock.code]
     score["name"] = [stock.name]
     score["LastPriceDate"] = [stock.quot_date]
-    score["LastFinancialsDate"] = [max(stock.financials.index)]
 
     score["Reference Price"] = [stock.reference_price]
     score["Graham Price"] = [stock.graham_price]
@@ -57,9 +56,9 @@ def main_fundamental_indicators(stock):
                                                                               stock.market_cap]
 
     #EFFICIENCY
-    score["Asset Turnover Ratio"] = [efficiency.get_asset_turnover_ratio(stock.sales,
-                                                                         stock.total_assets_begin,
-                                                                         stock.total_assets_end )]
+    #score["Asset Turnover Ratio"] = [efficiency.get_asset_turnover_ratio(stock.sales,
+    #                                                                     stock.total_assets_begin,
+    #                                                                     stock.total_assets_end )]
 
     #SOLVENCY
     score["Debt to Assets Ratio"] = [solvency.get_debt_to_assets_ratio(stock.total_debt,
@@ -72,10 +71,7 @@ def main_fundamental_indicators(stock):
                                                                              stock.interest_expense)]
     score["Debt Service Coverage Ratio"] = [solvency.get_debt_service_coverage_ratio(stock.operating_income,
                                                                                      stock.current_liabilities)]
-    score["Equity Multiplier"] = [solvency.get_equity_multiplier(stock.total_assets_begin,
-                                                                 stock.total_assets_end,
-                                                                 stock.total_equity_begin,
-                                                                 stock.total_equity_end)]
+
     score["Free Cash Flow Yield"] = solvency.get_free_cash_flow_yield(stock.free_cash_flow,
                                                                       stock.market_cap)
 
@@ -141,9 +137,7 @@ def main_fundamental_indicators(stock):
         
     score['volatility'] = volatility(stock)
     score['BUYBACK_SCORE'] = score_buyback(stock)
-    score['n_share'] = stock.n_shares
-    score['n_share_avg4y'] = np.mean(stock.balance_sheet['ShareIssued'].values)
-    
+   
     return score
 
 
@@ -153,9 +147,9 @@ def compute_slope(y):
     return reg.coef_.item()
 
 def score_buyback(stock):
-    if stock.n_shares < np.mean(stock.balance_sheet['ShareIssued'].values):
+    if stock.n_shares < np.mean(stock.yearly_balance_sheet['ShareIssued'].values):
         return 5
-    elif stock.n_shares == np.mean(stock.balance_sheet['ShareIssued'].values):
+    elif stock.n_shares == np.mean(stock.yearly_balance_sheet['ShareIssued'].values):
         return 3
     else:
         return 0
