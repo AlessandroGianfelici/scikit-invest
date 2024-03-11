@@ -2,6 +2,8 @@ import pandas as pd
 import os
 import yaml
 
+all_symbols = pd.read_csv("https://github.com/JerBouma/FinanceDatabase/raw/main/database/equities.csv")
+
 def load_linkedin():
     filepath = os.path.join(os.path.dirname(__file__), 'alternative', 'linkedin.csv')
     return pd.read_csv(filepath)
