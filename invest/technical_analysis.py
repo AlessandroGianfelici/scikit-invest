@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-def compute_longterm_trend(mystock, train_size=0.8):
-    data = mystock.hist.head(len(mystock.hist)-1)
-    data = data.loc[pd.to_datetime(data.index).year>2002]
+def compute_longterm_trend(data, train_size=0.8):
+
     first_trading_day = data.index.min()
     data['days_since_quot'] = (data.index - first_trading_day)/np.timedelta64(1, 'D')
     
@@ -31,7 +30,7 @@ def compute_longterm_trend(mystock, train_size=0.8):
     outlier_mask = np.logical_not(inlier_mask)
     
     # Compare estimated coefficients
-    score = ransac.estimator_.score(X_train, y_train)
+    score = ransac.estimator_.score(X_test, y_test)
     print(f"Estimated RANSAC quality: {score}")
     roe = ransac.estimator_.coef_.item()*365
     print(f"Theorical ROE: {roe}")
@@ -68,13 +67,13 @@ def compute_longterm_trend(mystock, train_size=0.8):
     plt.show()
     return score, roe, vol, data
 
-def detect_trend(full_hist, train_length = 120, verbose=True):
+def detect_trend(full_hist, train_length = 120, price_col = 'Close', verbose=True):
     data_norm = max(full_hist.reset_index()['index'])
     full_hist = full_hist.reset_index()
-    norm_price = full_hist['Close'].tail(1).item()
+    norm_price = full_hist[price_col].tail(1).item()
     
     x = (full_hist['index'].tail(train_length)/data_norm).values
-    y = (full_hist['Close'].tail(train_length)/norm_price).apply(np.log).values
+    y = (full_hist[price_col].tail(train_length)/norm_price).apply(np.log).values
     
     pw_fit = piecewise_regression.Fit(x, y, n_breakpoints=1)
     
@@ -88,9 +87,9 @@ def detect_trend(full_hist, train_length = 120, verbose=True):
     clean_trend = full_hist.loc[full_hist['index'] > int(best_b)]
     
     x_linear = (clean_trend.index/data_norm).values.reshape(-1, 1)
-    y_linear = (clean_trend['Close']/norm_price).apply(np.log).values.reshape(-1, 1)
+    y_linear = (clean_trend[price_col]/norm_price).apply(np.log).values.reshape(-1, 1)
     
-    ts_model = linear_model.TheilSenRegressor()
+    ts_model = linear_model.RANSACRegressor()
     ts_model.fit(x_linear, y_linear.ravel())
     
     current_trend = full_hist.loc[full_hist.index > best_b].copy()

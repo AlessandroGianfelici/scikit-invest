@@ -3,6 +3,8 @@
 
 # In[18]:
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 import invest
 from invest.stock import Stock
