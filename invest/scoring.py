@@ -91,11 +91,11 @@ def get_indicators(stock):
     
     tmp = main_fundamental_indicators(stock)
     tmp['st_trendline'] = st_last_value_trendline.tail(1)['predicted_trend'].item()
-    tmp['st_trend_magnitude'] = st_trend_magnitude.tail(1)['predicted_trend'].item()
+    tmp['st_trend_magnitude'] = st_trend_magnitude
     tmp['price_over_st_trend'] = (tmp['Reference Price'])/st_last_value_trendline.tail(1)['predicted_trend'].item()
     
     tmp['lt_trendline'] = lt_last_value_trendline.tail(1)['predicted_trend'].item()
-    tmp['lt_trend_magnitude'] = lt_trend_magnitude.tail(1)['predicted_trend'].item()
+    tmp['lt_trend_magnitude'] = lt_trend_magnitude
     tmp['price_over_lt_trend'] = (tmp['Reference Price'])/lt_last_value_trendline.tail(1)['predicted_trend'].item()
 
     tmp['sector'] = stock.sector
