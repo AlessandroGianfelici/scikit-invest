@@ -603,7 +603,7 @@ class Stock:
 
     @property
     def capital_expenditures(self):
-        return self.last_before_quot_date(self.cashflow)["CapitalExpenditures"]
+        return self.tail(1).cashflow["CapitalExpenditures"]
 
     @property
     def revenue(self):
