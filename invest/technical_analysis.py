@@ -1,16 +1,79 @@
 import piecewise_regression
-from sklearn.linear_model import TheilSenRegressor
+from sklearn import linear_model, model_selection
 from invest.plot import plot_candle, trendline, piecewise_regression_results
 import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 
+def compute_longterm_trend(data, train_size=0.8):
 
-def detect_trend(full_hist, train_length = 120, verbose=True):
+    first_trading_day = data.index.min()
+    data['days_since_quot'] = (data.index - first_trading_day)/np.timedelta64(1, 'D')
+    
+    ransac = linear_model.RANSACRegressor()
+    if train_size < 1:
+        train_data, test_data = model_selection.train_test_split(data, 
+                                                                 train_size = train_size,
+                                                                 shuffle = False)
+    else:
+        train_data, test_data = data, data
+    y_train = train_data['Adjclose'].apply(np.log).values
+    X_train = train_data['days_since_quot'].values.reshape(-1, 1) 
+    
+    y_test = test_data['Adjclose'].apply(np.log).values
+    X_test = test_data['days_since_quot'].values.reshape(-1, 1) 
+    
+    X = data['days_since_quot'].values.reshape(-1, 1) 
+    
+    ransac.fit(X_train, y_train)
+    inlier_mask = ransac.inlier_mask_
+    outlier_mask = np.logical_not(inlier_mask)
+    
+    # Compare estimated coefficients
+    score = ransac.estimator_.score(X_test, y_test)
+    print(f"Estimated RANSAC quality: {score}")
+    roe = ransac.estimator_.coef_.item()*365
+    print(f"Theorical ROE: {roe}")
+    
+    line_y_ransac = ransac.predict(X)
+    data['TheoricalValue'] = np.exp(line_y_ransac)
+    vol = ((data['Adjclose'] - data['TheoricalValue'])/data['TheoricalValue']).std()
+    print(f"Theorical VOL: {vol}")
+    
+    plt.scatter(
+        train_data.index[inlier_mask], np.exp(y_train[inlier_mask]), color="yellowgreen", marker=".", label="Inliers"
+    )
+    plt.scatter(
+        train_data.index[outlier_mask], np.exp(y_train[outlier_mask]), color="gold", marker=".", label="Outliers"
+    )
+    
+    if train_size < 1:
+        plt.scatter(test_data.index, 
+                    np.exp(y_test), 
+                    color="red", 
+                    marker=".", 
+                    label="Prediction")
+    
+    plt.plot(
+        data.index,
+        np.exp(line_y_ransac),
+        color="cornflowerblue",
+        linewidth=2,
+        label="RANSAC regressor",
+    )
+    plt.legend(loc="lower right")
+    plt.xlabel("Input")
+    plt.ylabel("Response")
+    plt.show()
+    return score, roe, vol, data
+
+def detect_trend(full_hist, train_length = 120, price_col = 'Close', verbose=True):
     data_norm = max(full_hist.reset_index()['index'])
     full_hist = full_hist.reset_index()
-    norm_price = full_hist['Close'].tail(1).item()
+    norm_price = full_hist[price_col].tail(1).item()
     
     x = (full_hist['index'].tail(train_length)/data_norm).values
-    y = (full_hist['Close'].tail(train_length)/norm_price).apply(np.log).values
+    y = (full_hist[price_col].tail(train_length)/norm_price).apply(np.log).values
     
     pw_fit = piecewise_regression.Fit(x, y, n_breakpoints=1)
     
@@ -24,12 +87,12 @@ def detect_trend(full_hist, train_length = 120, verbose=True):
     clean_trend = full_hist.loc[full_hist['index'] > int(best_b)]
     
     x_linear = (clean_trend.index/data_norm).values.reshape(-1, 1)
-    y_linear = (clean_trend['Close']/norm_price).apply(np.log).values.reshape(-1, 1)
+    y_linear = (clean_trend[price_col]/norm_price).apply(np.log).values.reshape(-1, 1)
     
-    ts_model = TheilSenRegressor()
-    ts_model.fit(x_linear, y_linear)
+    ts_model = linear_model.RANSACRegressor()
+    ts_model.fit(x_linear, y_linear.ravel())
     
-    current_trend = full_hist.loc[full_hist.index > best_b]
+    current_trend = full_hist.loc[full_hist.index > best_b].copy()
     x_predict = (current_trend.index/data_norm).values.reshape(-1, 1)
     current_trend['predicted_trend'] = np.squeeze(ts_model.predict(x_predict))
     current_trend['predicted_trend'] = current_trend['predicted_trend'].apply(np.exp)*norm_price
@@ -41,4 +104,5 @@ def detect_trend(full_hist, train_length = 120, verbose=True):
         pw_fit.summary()
         piecewise_regression_results(pw_fit)
         plot_candle(current_trend, trendline).show()
-    return trend_magnitude.item(), current_trend.tail(1)['predicted_trend'].item()
+    return trend_magnitude.item(), pd.concat([full_hist.loc[full_hist.index <= best_b].copy(),
+                                              current_trend])
