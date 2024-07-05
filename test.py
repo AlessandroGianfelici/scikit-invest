@@ -14,6 +14,6 @@ for symbol in symbols['SYMBOL']:
                         get_indicators(mystock)]))
     except Exception as e:
         print(e, e.__doc__)
-        raise
-
+result.to_excel('risultati.xlsx', index=0)
+compute_score(result.reset_index(drop=1)).to_excel('scores.xlsx', index=0)
 print("DONE!")
