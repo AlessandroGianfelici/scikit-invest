@@ -670,11 +670,16 @@ class Stock:
             return 0
 
     def annualize_financials(self, financials : pd.DataFrame, label : str):
-        period = int(financials['periodType'].unique().item().replace('M', ''))
-        variable = financials[label].dropna()
-        if len(variable) >= int(12/period):
-            results = variable.reset_index().tail(1)
-            results[label] = variable.tail(int(12/period)).sum()
-            return results
-        else:
-            return pd.DataFrame()
+        try:
+            period = int(financials['periodType'].unique().item().replace('M', ''))
+            variable = financials[label].dropna()
+            if len(variable) >= int(12/period):
+                results = variable.reset_index().tail(1)
+                results[label] = variable.tail(int(12/period)).sum()
+                return results
+            else:
+                return pd.DataFrame()
+        except KeyError:
+            logger.warn("Quarterly data not found! Using yearly")
+            return self.yearly_financials[label]
+    
