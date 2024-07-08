@@ -11,7 +11,7 @@ for symbol in symbols['SYMBOL']:
     try:
         mystock = Stock(symbol)
         result = (pd.concat([result,
-                        get_indicators(mystock)]))
+                             get_indicators(mystock)]))
     except Exception as e:
         print(e, e.__doc__)
 result.to_excel('risultati.xlsx', index=0)

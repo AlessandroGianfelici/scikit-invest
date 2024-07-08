@@ -664,7 +664,7 @@ class Stock:
     @property
     def interest_expense(self):
         try:
-            return self.yearly_financials.tail(1)[INTEREST_EXPENSE]
+            return self.yearly_financials.tail(1)[INTEREST_EXPENSE].item()
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
@@ -681,5 +681,5 @@ class Stock:
                 return pd.DataFrame()
         except KeyError:
             logger.warn("Quarterly data not found! Using yearly")
-            return self.yearly_financials[label]
+            return self.yearly_financials[label].reset_index().tail(1)
     
