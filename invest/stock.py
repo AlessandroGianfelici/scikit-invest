@@ -512,10 +512,24 @@ class Stock:
         else:
             return self.long_term_debt + self.current_liabilities
 
+    def find_longterm_debt_columns(self, df):
+        if ('LongTermDebt' in df.columns):
+            return df['LongTermDebt']
+        else:
+            result = df.filter(like='LongTermDebt')
+            if len(result.columns):
+                col = result.columns[0]
+                return result.rename(columns={col : 'LongTermDebt'}).dropna()
+            else:
+                return pd.DataFrame()
+            
+        
     @property
     def long_term_debt(self):
-        return (pd.concat([self.quarterly_financials['LongTermDebt'],
-                           self.yearly_financials['LongTermDebt']]).reset_index()
+        quarterly_longterm_debt = self.find_longterm_debt_columns(self.quarterly_financials)
+        yearly_longterm_debt = self.find_longterm_debt_columns(self.yearly_financials)
+        return (pd.concat([quarterly_longterm_debt,
+                           yearly_longterm_debt]).reset_index()
                   .sort_values(by='asOfDate').dropna().tail(1)['LongTermDebt'].item())
 
     @property
