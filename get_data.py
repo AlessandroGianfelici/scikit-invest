@@ -8,7 +8,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 import invest
 from invest.stock import Stock
-from invest import loader
+from invest.data_loader import loader
 import time
 import pandas as pd
 from invest.scoring import compute_score, get_indicators

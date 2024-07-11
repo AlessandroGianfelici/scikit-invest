@@ -1,7 +1,7 @@
 from invest.scoring import compute_score, get_indicators
 from invest import Stock
 import pandas as pd
-from invest.loader import load_borsa_italiana_stocks_symbols
+from invest.data_loader.loader import load_borsa_italiana_stocks_symbols
 
 symbols = load_borsa_italiana_stocks_symbols()
 
