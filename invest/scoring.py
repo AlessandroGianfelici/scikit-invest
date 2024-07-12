@@ -24,11 +24,11 @@ def compute_score(indicatori : pd.DataFrame):
 
     #EFFICIENCY
     #indicatori['score_value_ATR'] = score_efficiency_ATR(indicatori.copy())
-    #indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
+    indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
 
     #SOLVENCY
     indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**-1,  nan_score=np.nan)
-    indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**-1,  nan_score=np.nan)
+    #indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**-1,  nan_score=np.nan)
     indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'],  nan_score=np.nan)
     indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'],  nan_score=np.nan)
     indicatori['score_solvency_FCFY'] = score_quantile(indicatori['Free Cash Flow Yield'],  nan_score=np.nan)
@@ -48,30 +48,29 @@ def compute_score(indicatori : pd.DataFrame):
     #GROWTH
     indicatori['score_growth_netincome'] = 5*(indicatori['NetIncome derivative'] > 0).astype(int)
     indicatori['score_growth_revenue'] = 5*(indicatori['Revenue derivative'] > 0).astype(int)
-    indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
+    #indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
     indicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
-    indicatori['score_growth_freecashflow'] = 5*(indicatori['FreeCashFlow derivative'] > 0).astype(int)
-    indicatori['score_growth_tangiblebookvalue'] = 5*(indicatori['TangibleBookValue derivative'] > 0).astype(int)
+    #indicatori['score_growth_freecashflow'] = 5*(indicatori['FreeCashFlow derivative'] > 0).astype(int)
+    #indicatori['score_growth_tangiblebookvalue'] = 5*(indicatori['TangibleBookValue derivative'] > 0).astype(int)
 
     #TECHNICAL
     indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
     indicatori['score_technical_lttrend'] = score_TREND(indicatori['lt_trend_magnitude'])
-    indicatori['score_technical_volatility'] = score_quantile(-indicatori['volatility'])
+    #indicatori['score_technical_volatility'] = score_quantile(-indicatori['volatility'])
 
-    indicatori['VALUE_SCORE'] =  indicatori.filter(like='score_value').mean(axis=1)
-    indicatori['DIVIDEND_SCORE'] =  indicatori.filter(like='score_dividend').mean(axis=1)
-    indicatori['TECHNICAL_SCORE'] =  indicatori.filter(like='score_technical').mean(axis=1)
-    indicatori['GROWTH_SCORE'] =  indicatori.filter(like='score_growth').mean(axis=1)
-    indicatori['LIQUIDITY_SCORE'] =  indicatori.filter(like='score_liquidity').mean(axis=1)
-    indicatori['SOLVENCY_SCORE'] =  indicatori.filter(like='score_solvency').mean(axis=1)
+    #indicatori['VALUE_SCORE'] =  indicatori.filter(like='score_value').mean(axis=1)
+    #indicatori['DIVIDEND_SCORE'] =  indicatori.filter(like='score_dividend').mean(axis=1)
+    #indicatori['TECHNICAL_SCORE'] =  indicatori.filter(like='score_technical').mean(axis=1)
+    #indicatori['GROWTH_SCORE'] =  indicatori.filter(like='score_growth').mean(axis=1)
+    #indicatori['LIQUIDITY_SCORE'] =  indicatori.filter(like='score_liquidity').mean(axis=1)
+    #indicatori['SOLVENCY_SCORE'] =  indicatori.filter(like='score_solvency').mean(axis=1)
+    #indicatori['GRAHAM_SCORE'] =  indicatori['score_value_graham']
+    #indicatori['PE_SCORE'] =  indicatori['score_value_PE'] 
+    #indicatori['PB_SCORE'] =  indicatori['score_value_PB']
 
-    indicatori['GRAHAM_SCORE'] =  indicatori['score_value_graham']
-    indicatori['PE_SCORE'] =  indicatori['score_value_PE'] 
-    indicatori['PB_SCORE'] =  indicatori['score_value_PB']
+    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='score').mean(axis=1)
 
-    indicatori['OVERALL_SCORE'] =  indicatori.filter(like='SCORE').mean(axis=1)
-
-    return indicatori.sort_values(by='OVERALL_SCORE', ascending=False).drop(columns=['GRAHAM_SCORE','PE_SCORE','PB_SCORE'])
+    return indicatori.sort_values(by='OVERALL_SCORE', ascending=False)
 
 def score_price_to_free_cashflow(value):
     tmp = pd.DataFrame()

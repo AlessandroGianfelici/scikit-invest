@@ -158,10 +158,13 @@ class Stock:
     @property
     def n_shares(self):
         if self._n_shares is None:
-            self._n_shares = (pd.concat([self.yearly_balance_sheet['ShareIssued'],
-                                        self.quarterly_balance_sheet['ShareIssued']])
-                                .reset_index().sort_values(by='asOfDate').dropna()
-                                .tail(1)['ShareIssued'].item())
+            try:
+                self._n_shares = (pd.concat([self.yearly_balance_sheet,
+                                            self.quarterly_balance_sheet])
+                                    .reset_index().sort_values(by='asOfDate').dropna()
+                                    .tail(1)['ShareIssued'].item())
+            except:
+                self._n_shares = int(self.market_cap/self.reference_price)
         return self._n_shares
 
     @property
