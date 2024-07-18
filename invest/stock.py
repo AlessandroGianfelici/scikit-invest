@@ -6,7 +6,7 @@ import logging
 
 from yahooquery import Ticker
 from invest.ratios import liquidity
-
+import os
 
 logger = logging.getLogger()
 
@@ -20,10 +20,14 @@ TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
 
 class Stock:
-    def __init__(self, code: str, name: str = None):
-        self.code = code.upper()
-        self._name = name
-        self.ticker = Ticker(code.upper())
+    def __init__(self, isin : str):
+        self.isin = isin
+
+        self.scheda = pd.read_csv(os.path.join('symbols', 'isin_transcode', f'{isin}.csv'))
+        self.yahoo_code = f"{self.scheda['Codice Alfanumerico'].item()}.MI"
+
+        self._name = None
+        self.ticker = Ticker(self.yahoo_code.upper())
         self._sector = None
         self._reference_price = None
         self._hist = None
@@ -56,7 +60,7 @@ class Stock:
 
     @property
     def business_summary(self):
-        return self.ticker.summary_profile[self.code]['longBusinessSummary']
+        return self.ticker.summary_profile[self.yahoo_code]['longBusinessSummary']
 
 
     @property
@@ -68,7 +72,7 @@ class Stock:
     @property
     def last_financial_data(self):
         if self._last_financial_data is None:
-            self._last_financial_data = self.ticker.financial_data[self.code]
+            self._last_financial_data = self.ticker.financial_data[self.yahoo_code]
         return self._last_financial_data
     
     @staticmethod
@@ -97,14 +101,14 @@ class Stock:
             else:
                 return name[:-1]
         except:
-            return self.code
+            return self.yahoo_code
 
     @property
     def info(self):
         if self._info is None:
-            self._info = (self.ticker.summary_detail[self.code] |
-                          self.ticker.financial_data[self.code] |
-                          self.ticker.asset_profile[self.code])
+            self._info = (self.ticker.summary_detail[self.yahoo_code] |
+                          self.ticker.financial_data[self.yahoo_code] |
+                          self.ticker.asset_profile[self.yahoo_code])
         return self._info
 
     @property
@@ -217,7 +221,7 @@ class Stock:
     @property
     def PB(self):
         try:
-            return self.ticker.key_stats[self.code]['priceToBook']
+            return self.ticker.key_stats[self.yahoo_code]['priceToBook']
         except Exception as e:
             print(e, e.__doc__)
             return self.reference_price/ self.book_value
@@ -343,7 +347,7 @@ class Stock:
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             try:
-                return self.ticker.key_stats[self.code]['bookValue']
+                return self.ticker.key_stats[self.yahoo_code]['bookValue']
             except:
                 return self.stockholder_equity/self.n_shares
     
