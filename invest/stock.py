@@ -7,6 +7,7 @@ import logging
 from yahooquery import Ticker
 from invest.ratios import liquidity
 import os
+from invest.data_loader import euronext_milan
 
 logger = logging.getLogger()
 
@@ -23,16 +24,26 @@ class Stock:
     def __init__(self, isin : str):
         self.isin = isin
 
-        self.scheda = pd.read_csv(os.path.join('symbols', 'isin_transcode', f'{isin}.csv'))
+        self.scheda = pd.read_csv(os.path.join('invest', 
+                                               'symbols', 
+                                               'scheda', 
+                                               f'{isin}.csv'))
+        
+        self.financials = pd.read_csv(os.path.join('invest', 
+                                               'symbols', 
+                                               'financials', 
+                                               f'{isin}.csv')).set_index('Millenium').T
+        
         self.yahoo_code = f"{self.scheda['Codice Alfanumerico'].item()}.MI"
 
-        self._name = None
+        self.name = euronext_milan[isin]
+        self.sector = self.scheda['Super Sector'].item()
+
         self.ticker = Ticker(self.yahoo_code.upper())
-        self._sector = None
+
         self._reference_price = None
         self._hist = None
         self._info = None
-        self._financials = None
         self._yearly_financials = None
         self._quarterly_financials = None
         self._balance_sheet = None
@@ -51,71 +62,10 @@ class Stock:
         self._pretax_income = None
         self._EBIT = None
 
-    def name_option(self, key):
-        if key in self.business_summary:
-            option = self.business_summary.split(' '+ key)[0] + ' ' + key
-        else:
-            option = self.business_summary
-        return option
 
     @property
     def business_summary(self):
         return self.ticker.summary_profile[self.yahoo_code]['longBusinessSummary']
-
-
-    @property
-    def name(self):
-        if self._name is None:
-            self._name = self.get_name()
-        return self._name
-
-    @property
-    def last_financial_data(self):
-        if self._last_financial_data is None:
-            self._last_financial_data = self.ticker.financial_data[self.yahoo_code]
-        return self._last_financial_data
-    
-    @staticmethod
-    def company_suffixes():
-        suff_list = ['S.p.A',
-                     'SpA',
-                     'Spa',
-                     'S.P.A.',
-                     'Sa',
-                     'S.p.A.',
-                     'N.V.',
-                     'S.A.',
-                     'S.I.M.p.A.',
-                     'SA',
-                     'Corp.',
-                     'società per azioni',
-                     'Société anonyme']
-        return list(map(lambda x : x + ',', suff_list)) +  list(map(lambda x : x + ' ', suff_list))
-
-    def get_name(self):
-        try:
-            options = list(map(self.name_option, self.company_suffixes()))
-            name = min(options, key=len)
-            if name == self.business_summary:
-                return self.business_summary.split(",")[0]
-            else:
-                return name[:-1]
-        except:
-            return self.yahoo_code
-
-    @property
-    def info(self):
-        if self._info is None:
-            self._info = (self.ticker.summary_detail[self.yahoo_code] |
-                          self.ticker.financial_data[self.yahoo_code] |
-                          self.ticker.asset_profile[self.yahoo_code])
-        return self._info
-
-    @property
-    def sector(self):
-        if self._sector is None:
-            self._sector = self.get_info('sector')
-        return self._sector
         
     @property
     def yearly_financials(self):
