@@ -32,15 +32,15 @@ class Stock:
         self.financials = pd.read_csv(os.path.join('invest', 
                                                'symbols', 
                                                'financials', 
-                                               f'{isin}.csv')).set_index('Millenium').T
+                                               f'{isin}.csv')).set_index('Millenium').T.rename(columns={'Income from ordinary activities' : 'Proventi dalle attività ordinarie'})
         
         self.yahoo_code = f"{self.scheda['Codice Alfanumerico'].item()}.MI"
+        self.ticker = Ticker(self.yahoo_code.upper())
 
         self.name = euronext_milan[isin]
         self.sector = self.scheda['Super Sector'].item()
 
-        self.ticker = Ticker(self.yahoo_code.upper())
-
+        self.financial_coefficient = self.get_financial_coefficient()
         self._reference_price = None
         self._hist = None
         self._info = None
@@ -62,6 +62,13 @@ class Stock:
         self._pretax_income = None
         self._EBIT = None
 
+    def get_financial_coefficient(self):
+        udm_string = self.financials.head(1)['Valuta e unità di misura'].item()
+        match udm_string:
+            case 'EUR - unità': return 1
+            case 'EUR - migliaia': return 1000
+            case 'EUR - milioni': return 1000000
+            case _ : raise ValueError
 
     @property
     def business_summary(self):

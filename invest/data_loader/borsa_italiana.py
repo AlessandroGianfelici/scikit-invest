@@ -20,12 +20,12 @@ def load_scheda(url_scheda):
     loader = AsyncChromiumLoader([url_scheda])
     html = loader.load()
     soup = BeautifulSoup(str(html[0]), 'html.parser')
-    looking_for_scheda = True
+    scheda_found = True
     ind = 0
-    while looking_for_scheda:
+    while not scheda_found:
         maybe_scheda = pd.read_html(str(soup.find_all("table")[ind]))[0]
         maybe_scheda = maybe_scheda.set_index(maybe_scheda.columns[0]).T
-        looking_for_scheda = not('Codice Isin' in maybe_scheda.columns)
+        scheda_found = ('Codice Isin' in maybe_scheda.columns)
         ind+=1
     return maybe_scheda
 
@@ -42,3 +42,5 @@ def load_financials(url_financials):
         ind+=1
     return maybe_financials
 
+def url_builder(stock):
+    return stock
