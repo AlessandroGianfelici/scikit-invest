@@ -38,8 +38,7 @@ class Stock:
         self.ticker = Ticker(self.yahoo_code.upper())
 
         self.name = euronext_milan[isin]
-        self.sector = self.scheda['Super Sector'].item()
-
+        self.sector = self.get_super_sector()
         self.financial_coefficient = self.get_financial_coefficient()
         self._reference_price = None
         self._hist = None
@@ -69,6 +68,20 @@ class Stock:
             case 'EUR - migliaia': return 1000
             case 'EUR - milioni': return 1000000
             case _ : raise ValueError
+
+    def get_super_sector(self):
+        try:
+            return self.scheda['Super Sector'].item()
+        except:
+            return 'NA'
+
+
+    @property
+    def website(self):
+        try:
+            return self.ticker.summary_profile[self.yahoo_code]['website']
+        except:
+            return ''
 
     @property
     def business_summary(self):

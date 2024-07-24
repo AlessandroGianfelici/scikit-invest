@@ -2,7 +2,15 @@ from langchain_community.document_loaders import AsyncChromiumLoader
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
+from invest import Stock
 
+def isin2website(isin):
+    try:
+        mystock = Stock(isin)
+        return mystock.website
+    except Exception as e:
+        return f'{e} : {e.__doc__}'
+    
 def load_isin_list():
     url = f"https://www.milanofinanza.it/quotazioni/ricerca/listino-completo-2ae?campoord=&ord=&alias=&selettorecod=&pag=0"
     html_code = requests.get(url)
