@@ -38,6 +38,7 @@ def parse_links_from_html(html):
     hrefs = [link for link in hrefs if 'euronext' not in link]
     hrefs = [link for link in hrefs if 'linkedin' not in link]
     hrefs = [link for link in hrefs if 'borsaitaliana' not in link]
+    print(hrefs)
     return hrefs
 
 def get_company_website_link(isin):
