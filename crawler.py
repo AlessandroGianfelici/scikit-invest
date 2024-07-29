@@ -1,27 +1,30 @@
-# -*- coding: utf-8 -*-
+import scrapy
+from scrapy.linkextractors import LinkExtractor
+from urllib.parse import urlparse
 import os
 
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+start_urls
 
-def process_page(url : str):
-    recipe_dict = parse_recipe(url)
-    filename = recipe_dict['title'].replace(" ", "_").replace(".", "_")
-    write_json(recipe_dict, 
-               os.path.join(select_or_create(JSON_PATH), 
-                            filename))
-class MySpider(CrawlSpider):
-    name = 'gspider'
-    allowed_domains = DOMAINS
-    start_urls = URLS
-    rules = (# Extract and follow all links!
-        Rule(LinkExtractor(), callback='parse_item', follow=True), )
-               
-    def parse_item(self, response):
-        """
-        This method look at the link and, if it's not already processed,
-        it parse the recipe and dump it into a json file.
-        """
-        if (url := response.url) not in PROCESSED_URL:
-            process_page(url)
-            self.log('crawling'.format(response.url))
+class PdfSpider(scrapy.Spider):
+    name = 'pdf_spider'
+
+    def __init__(self, domains=None, *args, **kwargs):
+        super(PdfSpider, self).__init__(*args, **kwargs)
+        self.start_urls = []
+        self.allowed_domains = [domain for domain in domains.split(',')]
+
+    def parse(self, response):
+        le = LinkExtractor(allow=(), tags=('a', 'area'), attrs=('href',), deny_extensions=())
+        links = le.extract_links(response)
+        for link in links:
+            if link.url.endswith('.pdf'):
+                yield scrapy.Request(link.url, callback=self.save_pdf)
+            else:
+                yield scrapy.Request(link.url, callback=self.parse)
+
+    def save_pdf(self, response):
+        path = urlparse(response.url).path
+        file_name = os.path.basename(path)
+        self.logger.info(f"Saving PDF {file_name}")
+        with open(file_name, 'wb') as f:
+            f.write(response.body)

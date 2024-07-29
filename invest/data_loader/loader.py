@@ -6,7 +6,10 @@ def load_linkedin():
     return pd.read_csv(filepath)
 
 def load_symbols(filename : str):
-    filepath = os.path.join(os.path.dirname(__file__), 'symbols', filename)
+    filepath = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                            'symbols', 
+                            filename)
+    print(filepath)
     return pd.read_csv(filepath).drop_duplicates().reset_index(drop=True)
 
 def load_borsa_italiana_stocks_symbols():

@@ -1,6 +1,5 @@
 Nome,Codice ISIN,website
 4AIM SICAF,IT0005204729,https://www.4aim.it
-4AIM SICAF COMPARTO 2 CROWDFUNDING,IT0005440323,[Errno 2] No such file or directory: 'invest/symbols/financials/IT0005440323.csv' : File not found.
 A.B.P. NOCIVELLI,IT0005439861,https://www.abpnocivelli.com
 A2A,IT0001233417,https://www.gruppoa2a.it/it/home
 AATECH,IT0005548521,https://aatech.it
@@ -12,7 +11,7 @@ ACQUAZZURRA,IT0005443061,
 AEDES,IT0005349052,https://www.aedes-siiq.com
 AEFFE,IT0001384590,https://aeffe.com
 AEROPORTO GUGLIELMO MARCONI DI BOLOGNA,IT0001006128,https://www.bologna-airport.it
-AGATOS,IT0005421919,
+AGATOS,IT0005421919,https://www.agatos.it
 ALA,IT0005446700,https://www.alacorporation.com
 ALERION,IT0004720733,https://www.alerion.it
 ALFIO BARDOLLA,IT0005244030,https://www.alfiobardolla.com
@@ -51,14 +50,14 @@ BCO DESIO BRIANZA,IT0001041000,https://www.bancodesio.it
 BEEWIZE,IT0001487047,https://www.beewize.it
 BEGHELLI,IT0001223277,https://www.beghelli.com
 BELLINI NAUTICA,IT0005497042,https://www.bellininautica.it
-BERTOLOTTI,IT0005585127,
+BERTOLOTTI,IT0005585127,https://www.bertolottispa.com
 BESTBE HOLDING,IT0004942915,https://www.gequity.it
 BFF BANK,IT0005244402,https://www.bff.com
 BIALETTI INDUSTRIE,IT0004222102,https://www.bialetti.com
 BIESSE,IT0003097257,https://www.biesse.com
 BIFIRE,IT0005495335,https://www.bifire.it
 BIOERA,IT0005516130,https://www.bioera.it
-BOLOGNAFIERE,IT0003516066,
+BOLOGNAFIERE,IT0003516066,https://bolognafiere.it
 BORGOSESIA,IT0003217335,https://www.borgosesiaspa.com
 BPER BANCA,IT0000066123,https://www.bper.it
 BRIOSCHI,IT0000066180,https://www.brioschi.it
@@ -69,11 +68,11 @@ CALEFFI,IT0003025019,https://www.caleffigroup.it
 CALTAGIRONE,IT0003127930,https://www.caltagironespa.it
 CALTAGIRONE EDIT,IT0001472171,https://www.caltagironeeditore.com
 CAREL INDUSTRIES,IT0005331019,https://www.carel.com
-CASTA DIVA GROUP,IT0005003782,[Errno 2] No such file or directory: 'invest/symbols/scheda/IT0005003782.csv' : File not found.
+CASTA DIVA GROUP,IT0005003782,https://www.castadivagroup.com
 CELLULARLINE,IT0005244618,https://www.cellularlinegroup.com
 CEMBRE,IT0001128047,https://www.cembre.it
 CENTRALE DEL LATTE D'ITALIA,IT0003023980,https://centralelatteitalia.com
-CHL,IT0001446613,
+CHL,IT0001446613,https://www.chl.it
 CIR,IT0000070786,https://www.cirgroup.it
 CIRCLE,IT0005344996,https://www.circletouch.eu
 CIVITANAVI SYSTEMS,IT0005466153,https://www.civitanavi.com
@@ -89,7 +88,7 @@ CONAFI,IT0004105653,https://www.conafi.it
 CONFINVEST,IT0005379604,https://www.confinvest.it
 CONVERGENZE,IT0005426215,https://convergenze.it
 COPERNICO,IT0005379406,https://www.copernicosim.it
-CREACTIVES GROUP,IT0005408593,
+CREACTIVES GROUP,IT0005408593,https://www.creactivesgroup.com
 CREDEM,IT0003121677,https://www.credem.it
 CROWDFUNDME,IT0005353575,https://www.crowdfundme.it
 CSP INT IND CALZE,IT0001127874,https://cspinternational.it/en
@@ -98,7 +97,6 @@ CULTI MILANO,IT0005257347,https://www.culti.com
 CY4GATE,IT0005412504,https://www.cy4gate.com
 CYBEROO,IT0005546103,https://cyberoo.com
 DANIELI C,IT0000076502,https://www.danieli.com
-DANIELI C RISP NC,IT0000076486,[Errno 2] No such file or directory: 'invest/symbols/financials/IT0000076486.csv' : File not found.
 DATALOGIC,IT0004053440,https://www.datalogic.com
 DATRIX,IT0005468357,https://www.datrixgroup.com
 DBA GROUP,IT0005285942,https://www.dbagroup.it
@@ -113,12 +111,12 @@ DIGITAL BROS,IT0001469995,https://digitalbros.com
 DIGITAL VALUE,IT0005347429,https://www.digitalvalue.it
 DIGITOUCH,IT0005089476,https://www.gruppodigitouch.it
 DIRECTA SIM,IT0001463063,https://www.directa.it
-DISTRIBUZIONE ELETTRICA ADRIATICA,IT0005600249,
+DISTRIBUZIONE ELETTRICA ADRIATICA,IT0005600249,https://www.deaelettrica.it
 DOTSTAY,IT0005523839,https://www.dotstay.com
 DOVALUE,IT0001044996,https://www.dovalue.it
 DOXEE,IT0005394413,https://www.doxee.com
 E-GLOBE,IT0005557514,https://www.e-globe.it
-E-NOVIA,IT0005391229,
+E-NOVIA,IT0005391229,https://e-novia.it
 E.P.H.,IT0005596330,https://www.epricespa.it
 ECOMEMBRANE,IT0005543332,https://www.ecomembrane.com
 ECOSUNTEK,IT0005001943,https://www.ecosuntek.com
@@ -126,18 +124,18 @@ EDIL SAN FELICE,IT0005561441,https://www.edilsanfelice.it
 EDILIZIACROBATICA,IT0005351504,https://www.ediliziacrobatica.com
 EDISON R,IT0003372205,https://www.edison.it/it
 EEMS,IT0005577868,https://www.eems.com
-EGOMNIA,IT0005586497,
+EGOMNIA,IT0005586497,https://www.egomnia.com
 EL.EN.,IT0005453250,https://elengroup.com
 ELES,IT0005373417,https://www.eles.com
 ELICA,IT0003404214,https://www.elica.com
-ELIGO,IT0005524423,
+ELIGO,IT0005524423,https://www.eligo.social
 ELSA SOLUTIONS,IT0005561466,https://elsaweb.it
 EMAK,IT0001237053,https://www.emakgroup.it
 EMMA VILLAS,IT0005562183,https://www.emmavillas.com
 ENAV,IT0005176406,https://www.enav.it
 ENEL,IT0003128367,https://www.enel.com
 ENERGY,IT0005500712,https://www.energysynt.com
-ENERTRONICA SANTERNO,IT0004887409,
+ENERTRONICA SANTERNO,IT0004887409,https://enertronicasanterno.it
 ENERVIT,IT0004356751,https://www.enervit.com
 ENI,IT0003132476,https://www.eni.com
 EPRCOMUNICAZIONE,IT0005519837,https://eprcomunicazione.it
@@ -155,10 +153,9 @@ EUROTECH,IT0003895668,https://www.eurotech.com
 EVISO,IT0005430936,https://www.eviso.ai
 EXECUS,IT0005557530,https://www.execus.com
 EXPERT.AI,IT0004496029,https://www.expert.ai
-EXPRIVIA,IT0001477402,[Errno 2] No such file or directory: 'invest/symbols/scheda/IT0001477402.csv' : File not found.
 FAE TECHNOLOGY,IT0005500688,https://www.fae.technology
 FARMACOSMO,IT0005487670,https://www.farmacosmo.it
-FENIX ENTERTAINMENT,IT0005403495,
+FENIX ENTERTAINMENT,IT0005403495,https://www.fenixent.com
 FERRETTI,IT0005383291,https://www.ferrettigroup.com
 FERVI,IT0005325912,https://www.fervi.com
 FIDIA,IT0001498481,https://www.fidia.it
@@ -203,15 +200,15 @@ H-FARM,IT0004674666,https://www.h-farm.com/en
 HEALTH ITALIA,IT0005585861,https://www.healthitalia.it
 HERA,IT0001250932,https://www.gruppohera.it
 HIGH QUALITY FOOD,IT0005450694,https://www.hqf.it
-HOMIZY,IT0005468662,
+HOMIZY,IT0005468662,https://homizy.com
 I GRANDI VIAGGI,IT0005108219,https://www.igrandiviaggi.it
 I.CO.P.,IT0001214433,[Errno 2] No such file or directory: 'invest/symbols/scheda/IT0001214433.csv' : File not found.
 I.M.D. INTERNATIONAL MEDICAL DEVICES,IT0005549255,https://www.imdgroup.it
 IERVOLINO LADY BACARDI ENTERTAINMENT,IT0005380602,https://ilbegroup.it
 IGD,IT0005322612,https://www.gruppoigd.it
-IIG,IT0004937469,
+IIG,IT0004937469,https://italiaindependentgroup.com
 IL SOLE 24 ORE,IT0005283111,https://www.gruppo24ore.ilsole24ore.com
-ILLA,IT0005578395,
+ILLA,IT0005578395,https://www.illa.it
 ILLIMITY BANK,IT0005359192,https://www.illimity.com
 ILPRA,IT0005359101,https://www.ilpra.com
 IMMSI,IT0001413837,https://www.immsi.it
@@ -239,17 +236,15 @@ ITALMOBILIARE,IT0005253205,https://www.italmobiliare.it
 IVISION TECH,IT0005554784,https://www.ivisioneyewear.it
 JUVENTUS FC,IT0005572778,https://www.juventus.com
 KME GROUP,IT0004552359,https://www.itkgroup.it
-KME GROUP RSP,IT0004552367,[Errno 2] No such file or directory: 'invest/symbols/financials/IT0004552367.csv' : File not found.
-KOLINPHARMA,IT0005322950,[Errno 2] No such file or directory: 'invest/symbols/scheda/IT0005322950.csv' : File not found.
-KRUSO KAPITAL,IT0005573800,
+KRUSO KAPITAL,IT0005573800,https://www.krusokapital.com
 LA SIA,IT0005555468,https://www.lasia.it
 LABORATORIO FARMACEUTICO ERFO,IT0005497885,https://www.erfo.it
 LANDI RENZO,IT0004210289,https://www.landirenzogroup.com
-LEMON SISTEMI,IT0005573438,
+LEMON SISTEMI,IT0005573438,https://lemonsistemi.it
 LEONARDO,IT0003856405,https://www.leonardo.com/en/home
 LEONE FILM GROUP,IT0004973696,https://www.leonefilmgroup.com
 LINDBERGH,IT0005469272,https://www.lindberghspa.it
-LITIX,IT0005600801,
+LITIX,IT0005600801,https://www.litix.com
 LONGINO CARDENAL,IT0005337073,https://www.longino.it
 LOTTOMATICA GROUP,IT0005541336,https://lottomaticagroup.com
 LUCISANO MEDIA GROUP,IT0004522162,https://www.lucisanomediagroup.com
@@ -280,7 +275,7 @@ NEOSPERIENCE,IT0005497018,https://www.neosperience.com
 NETWEEK,IT0005545675,https://www.netweekspa.it
 NEWLAT FOOD,IT0005385213,https://www.newlat.it
 NEXI,IT0005366767,https://www.nexigroup.com
-NEXT GEOSOLUTIONS EUROPE,IT0005594418,
+NEXT GEOSOLUTIONS EUROPE,IT0005594418,https://www.nextgeo.eu
 NEXT RE,IT0005330516,https://www.nextresiiq.it
 NOTORIOUS PICTURES,IT0005025355,https://www.notoriouspictures.it
 NUSCO,IT0005453110,https://www.nuscospa.com
@@ -335,7 +330,7 @@ S.I.F. ITALIA,IT0005468290,https://www.sifitalia.it
 S.S. LAZIO,IT0003621783,https://www.sslazio.it
 SABAF,IT0001042610,https://www.sabafgroup.com
 SACCHERIA F.LLI FRANCESCHETTI,IT0005521551,https://www.saccheriafranceschetti.com
-SAFILO GROUP,IT0004604762,[Errno 2] No such file or directory: 'invest/symbols/financials/IT0004604762.csv' : File not found.
+SAFILO GROUP,IT0004604762,
 SAIPEM,IT0005495657,https://www.saipem.com
 SAIPEM RISP CV,IT0005495673,[Errno 2] No such file or directory: 'invest/symbols/financials/IT0005495673.csv' : File not found.
 SALCEF GROUP,IT0005388266,https://www.salcef.com

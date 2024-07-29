@@ -2,14 +2,14 @@ from langchain_community.document_loaders import AsyncChromiumLoader
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
-from invest import Stock
+#from invest import Stock
 
-def isin2website(isin):
-    try:
-        mystock = Stock(isin)
-        return mystock.website
-    except Exception as e:
-        return f'{e} : {e.__doc__}'
+#def isin2website(isin):
+#    try:
+#        mystock = Stock(isin)
+#        return mystock.website
+#    except Exception as e:
+#        return f'{e} : {e.__doc__}'
     
 def load_isin_list():
     url = f"https://www.milanofinanza.it/quotazioni/ricerca/listino-completo-2ae?campoord=&ord=&alias=&selettorecod=&pag=0"
@@ -23,6 +23,27 @@ def url_scheda(isin):
 
 def url_financials(isin):
     return f"https://www.borsaitaliana.it/borsa/azioni/profilo-societa-dettaglio.html?isin={isin}&lang=it"
+
+def parse_links_from_html(html):
+
+    # Crea un oggetto BeautifulSoup
+    soup = BeautifulSoup(str(html[0]), 'html.parser')
+
+    # Trova tutti i tag <a>
+    links = soup.find_all('a')
+
+    # Estrai gli attributi href dai tag <a>
+    hrefs = [link.get('href') for link in links if link.get('href') is not None]
+    hrefs = [link for link in hrefs if link.startswith("http")]
+    hrefs = [link for link in hrefs if 'euronext' not in link]
+    hrefs = [link for link in hrefs if 'linkedin' not in link]
+    hrefs = [link for link in hrefs if 'borsaitaliana' not in link]
+    return hrefs
+
+def get_company_website_link(isin):
+    loader = AsyncChromiumLoader([url_financials(isin)])    
+    html = loader.load()
+    return parse_links_from_html(html)[0]
 
 def load_scheda(url_scheda):
     loader = AsyncChromiumLoader([url_scheda])
