@@ -16,6 +16,7 @@ for isin in it_stocks['Codice ISIN']:
     print(isin)
     transcode_table_path = os.path.join(transcode_path, f'{isin}.csv')
     financials_table_path = os.path.join(financials_path, f'{isin}.csv')
+
     if not(file_folder_exists(transcode_table_path)):
         try:
             transcode_table = load_scheda(url_scheda(isin))

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime
+from invest.utils import file_folder_exists, select_or_create
 import logging
 
 from yahooquery import Ticker
@@ -20,19 +20,24 @@ INTEREST_EXPENSE = 'InterestExpense'
 TOT_EQUITY = "TotalStockholderEquity"
 INTANGIBLE_ASSETS = "IntangibleAssets"
 
+def load_scheda(isin):
+    return pd.read_csv(os.path.join('invest', 
+                                    'symbols', 
+                                    'scheda', 
+                                   f'{isin}.csv'))
+
+def load_financials(isin):
+    return pd.read_csv(os.path.join('invest', 
+                                    'symbols', 
+                                    'financials', 
+                                   f'{isin}.csv')).set_index('Millenium').T.rename(columns={'Income from ordinary activities' : 'Proventi dalle attività ordinarie'})
+
 class Stock:
     def __init__(self, isin : str):
         self.isin = isin
 
-        self.scheda = pd.read_csv(os.path.join('invest', 
-                                               'symbols', 
-                                               'scheda', 
-                                               f'{isin}.csv'))
-        
-        self.financials = pd.read_csv(os.path.join('invest', 
-                                               'symbols', 
-                                               'financials', 
-                                               f'{isin}.csv')).set_index('Millenium').T.rename(columns={'Income from ordinary activities' : 'Proventi dalle attività ordinarie'})
+        self.scheda = load_scheda(isin)
+        self.financials = load_financials(isin)
         
         self.yahoo_code = f"{self.scheda['Codice Alfanumerico'].item()}.MI"
         self.ticker = Ticker(self.yahoo_code.upper())
@@ -40,6 +45,7 @@ class Stock:
         self.name = euronext_milan[isin]
         self.sector = self.get_super_sector()
         self.financial_coefficient = self.get_financial_coefficient()
+
         self._reference_price = None
         self._hist = None
         self._info = None
@@ -52,7 +58,6 @@ class Stock:
         self._n_shares = None
         self._quarterly_cashflow = None
         self._net_income = None
-        self.quot_date =  datetime.now()
         self._last_financial_data = None
         self._total_assets = None
         self._total_liabilities = None
@@ -85,18 +90,34 @@ class Stock:
 
     @property
     def business_summary(self):
-        return self.ticker.summary_profile[self.yahoo_code]['longBusinessSummary']
+        try:
+            return self.ticker.summary_profile[self.yahoo_code]['longBusinessSummary']
+        except:
+            return ''
         
+    def load_financials(self, frequency):
+        new_yearly_financial = self.ticker.all_financial_data(frequency=frequency).set_index('asOfDate')
+        
+        filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
+                                 f'{frequency}_financials.csv')
+        if file_folder_exists(filepath):
+            old_yearly_financial  = pd.read_csv(filepath)
+        else:
+            old_yearly_financial  = pd.DataFrame()
+        yearly_financials = pd.concat([old_yearly_financial, new_yearly_financial])
+        yearly_financials.to_csv(filepath)
+        return yearly_financials
+
     @property
     def yearly_financials(self):
         if self._yearly_financials is None:
-            self._yearly_financials = self.ticker.all_financial_data(frequency='a').set_index('asOfDate')
+            self._yearly_financials = self.load_financials(frequency='a')
         return self._yearly_financials
 
     @property
     def quarterly_financials(self):
         if self._quarterly_financials is None:
-            self._quarterly_financials = self.ticker.all_financial_data(frequency='q').set_index('asOfDate')
+            self._quarterly_financials = self.load_financials(frequency='q')
         return self._quarterly_financials
 
     @property

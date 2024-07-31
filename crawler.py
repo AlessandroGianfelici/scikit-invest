@@ -3,8 +3,6 @@ from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
 import os
 import pandas as pd
-from PyPDF2 import PdfReader
-from io import BytesIO
 
 def file_folder_exists(path: str):
     """
@@ -37,16 +35,20 @@ def get_domain_from_url(url):
 data_path = os.path.join('invest', 'symbols', 'company_url_table.csv')
 start_urls = pd.read_csv(data_path)
 start_urls['domain'] = start_urls['website'].apply(get_domain_from_url)
+#start_urls = start_urls.loc[start_urls['isin'] == 'IT0003242622']
 
 class PdfSpider(scrapy.Spider):
     name = 'pdf_spider'
 
-    def __init__(self, domain_table = start_urls, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(PdfSpider, self).__init__(*args, **kwargs)
         self.start_urls = start_urls['website'].to_list()
         self.allowed_domains = start_urls['domain'].to_list()
         self.folders = start_urls['isin'].to_list()
-        self.keywords = ['EBIT']
+        self.keywords = ['results', 
+                         'risultati',
+                         'trimestrale',
+                         'annuale']
 
 
     def parse(self, response):
@@ -54,26 +56,18 @@ class PdfSpider(scrapy.Spider):
         links = le.extract_links(response)
         for link in links:
             if link.url.endswith('.pdf'):
-                yield scrapy.Request(link.url, callback=self.save_pdf)
+                yield scrapy.Request(link.url, callback=self.filter_pdf)
             else:
                 yield scrapy.Request(link.url, callback=self.parse)
 
     def filter_pdf(self, response):
         # Leggi il contenuto del PDF
-        pdf_stream = BytesIO(response.body)
-        pdf_reader = PdfReader(pdf_stream)
+        path = urlparse(response.url).path
+        file_name = os.path.basename(path)
 
-        for page_num in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[page_num]
-            text = page.extract_text()
-            print('\n\n\n\n\n\n\n')
-            print(text)
-            print('\n\n\n\n\n\n\n')
-            # Controlla se il testo contiene una delle parole chiave
-            if any(keyword in text for keyword in self.keywords):
-                self.save_pdf(response)
-                pdf_stream.close()
-                return
+        if any(keyword in file_name.lower() for keyword in self.keywords):
+            self.save_pdf(response)
+
 
     def save_pdf(self, response):
         path = urlparse(response.url).path
