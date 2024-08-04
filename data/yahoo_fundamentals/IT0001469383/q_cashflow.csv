@@ -1,0 +1,9 @@
+symbol,asOfDate,periodType,currencyCode,BeginningCashPosition,CapitalExpenditure,ChangeInCashSupplementalAsReported,ChangeInInventory,ChangeInOtherCurrentAssets,ChangeInPayable,ChangeInReceivables,ChangeInWorkingCapital,ChangesInCash,DeferredTax,Depreciation,DepreciationAndAmortization,EndCashPosition,FinancingCashFlow,FreeCashFlow,GainLossOnSaleOfPPE,InterestPaidCFF,InvestingCashFlow,NetBusinessPurchaseAndSale,NetCommonStockIssuance,NetIncome,NetIncomeFromContinuingOperations,NetInvestmentPurchaseAndSale,NetIssuancePaymentsOfDebt,NetLongTermDebtIssuance,NetOtherInvestingChanges,NetPPEPurchaseAndSale,OperatingCashFlow,OtherNonCashItems,ProvisionandWriteOffofAssets,StockBasedCompensation,TaxesRefundPaid
+MN.MI,2020-06-30,TTM,EUR,34291000.0,-17692000.0,-6835000.0,-13919000.0,24577000.0,44684000.0,-55897000.0,-555000.0,-6835000.0,9755000.0,47720000.0,47720000.0,27456000.0,-84978000.0,50495000.0,-826000.0,-5423000.0,9956000.0,41787000.0,-3054000.0,,5054000.0,-10411000.0,-61042000.0,-61042000.0,-3728000.0,3884000.0,68187000.0,9686000.0,-1485000.0,1381000.0,-14495000.0
+MN.MI,2022-09-30,TTM,EUR,,,,,,,,,,,,,,,,,,,,,53109000.0,,,,,,,,,,,
+MN.MI,2023-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,-5200000.0,,,,,,,,,,,
+MN.MI,2023-06-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,17421000.0,,,,,,,,,,,
+MN.MI,2023-09-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,54081000.0,,,,,,,,,,,
+MN.MI,2023-12-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,-3891000.0,,,,,,,,,,,
+MN.MI,2024-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,-7093000.0,,,,,,,,,,,
+MN.MI,2024-03-31,TTM,EUR,,,,,,,,,,,,,,,,,,,,,60518000.0,,,,,,,,,,,

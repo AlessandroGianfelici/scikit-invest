@@ -1,0 +1,8 @@
+symbol,asOfDate,periodType,currencyCode,BeginningCashPosition,CapitalExpenditure,ChangeInCashSupplementalAsReported,ChangeInOtherCurrentAssets,ChangeInOtherCurrentLiabilities,ChangeInWorkingCapital,ChangesInCash,DeferredTax,DividendsReceivedCFI,EndCashPosition,FinancingCashFlow,FreeCashFlow,GainLossOnInvestmentSecurities,InvestingCashFlow,NetBusinessPurchaseAndSale,NetCommonStockIssuance,NetIncome,NetIncomeFromContinuingOperations,NetIntangiblesPurchaseAndSale,NetInvestmentPurchaseAndSale,NetPPEPurchaseAndSale,OperatingCashFlow,OtherNonCashItems,ProvisionandWriteOffofAssets,PurchaseOfBusiness,PurchaseOfIntangibles,PurchaseOfInvestment,PurchaseOfPPE,SaleOfBusiness,SaleOfIntangibles,SaleOfInvestment,SaleOfPPE
+ILTY.MI,2022-06-30,TTM,EUR,513830000.0,-28437000.0,-116805000.0,-127995000.0,-11611000.0,-282135000.0,-116805000.0,23621000.0,0.0,397025000.0,56968000.0,-176872000.0,-6178000.0,-25338000.0,0.0,56968000.0,69641000.0,69641000.0,-27446000.0,-3567000.0,5675000.0,-148435000.0,11775000.0,34841000.0,0.0,-27446000.0,-3567000.0,-991000.0,0.0,0.0,0.0,6666000.0
+ILTY.MI,2023-03-31,3M,EUR,,,,,,,,,,,,,,,,,7789000.0,,,,,,,,,,,,,,,
+ILTY.MI,2023-06-30,3M,EUR,,,,,,,,,,,,,,,,,44380000.0,,,,,,,,,,,,,,,
+ILTY.MI,2023-09-30,3M,EUR,,,,,,,,,,,,,,,,,22837000.0,,,,,,,,,,,,,,,
+ILTY.MI,2023-12-31,3M,EUR,,,,,,,,,,,,,,,,,29394000.0,,,,,,,,,,,,,,,
+ILTY.MI,2024-03-31,3M,EUR,,,,,,,,,,,,,,,,,10753000.0,,,,,,,,,,,,,,,
+ILTY.MI,2024-03-31,TTM,EUR,,,,,,,,,,,,,,,,,107364000.0,,,,,,,,,,,,,,,

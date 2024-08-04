@@ -1,0 +1,9 @@
+symbol,asOfDate,periodType,currencyCode,EffectOfExchangeRateChanges,NetBusinessPurchaseAndSale,NetCommonStockIssuance,NetIncome,NetInvestmentPurchaseAndSale,PurchaseOfBusiness,SaleOfBusiness
+MB.MI,2018-12-31,TTM,EUR,,,,,-114986000.0,,
+MB.MI,2020-06-30,TTM,EUR,0.0,0.0,-105528000.0,,,0.0,0.0
+MB.MI,2022-12-31,3M,EUR,,,,292479000.0,,,
+MB.MI,2023-06-30,3M,EUR,,,,236300000.0,,,
+MB.MI,2023-09-30,3M,EUR,,,,351300000.0,,,
+MB.MI,2023-12-31,3M,EUR,,,,259879000.0,,,
+MB.MI,2024-06-30,3M,EUR,,,,234900000.0,,,
+MB.MI,2024-06-30,TTM,EUR,,,,1026000000.0,,,

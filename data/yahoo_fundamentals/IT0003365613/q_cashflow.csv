@@ -1,0 +1,7 @@
+symbol,asOfDate,periodType,currencyCode,BeginningCashPosition,CapitalExpenditure,ChangeInInventory,ChangeInOtherCurrentAssets,ChangeInPayable,ChangeInPrepaidAssets,ChangeInReceivables,ChangeInWorkingCapital,ChangesInCash,DeferredTax,Depreciation,DepreciationAndAmortization,EndCashPosition,FinancingCashFlow,FreeCashFlow,GainLossOnSaleOfBusiness,InterestPaidCFO,InterestReceivedCFO,InvestingCashFlow,NetBusinessPurchaseAndSale,NetCommonStockIssuance,NetIncome,NetIncomeFromContinuingOperations,NetIntangiblesPurchaseAndSale,NetOtherFinancingCharges,NetPPEPurchaseAndSale,OperatingCashFlow,OtherNonCashItems,PensionAndEmployeeBenefitExpense,ProvisionandWriteOffofAssets,PurchaseOfIntangibles,PurchaseOfPPE,SaleOfBusiness,StockBasedCompensation,TaxesRefundPaid
+FM.MI,2023-06-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,,17366000.0,,,,,,,,,,,,,
+FM.MI,2023-09-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,,-1980000.0,,,,,,,,,,,,,
+FM.MI,2023-12-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,,21582000.0,,,,,,,,,,,,,
+FM.MI,2024-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,,7676000.0,,,,,,,,,,,,,
+FM.MI,2024-06-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,,15051000.0,,,,,,,,,,,,,
+FM.MI,2024-06-30,TTM,EUR,59961000.0,-4879000.0,1788000.0,3000.0,-27650000.0,-29132000.0,28815000.0,-29043000.0,35228000.0,7474000.0,51928000.0,51928000.0,95189000.0,-25767000.0,59741000.0,0.0,-13950000.0,5332000.0,-3625000.0,1254000.0,35000.0,42329000.0,42378000.0,-2479000.0,20648000.0,-2400000.0,64620000.0,7668000.0,311000.0,2801000.0,-2479000.0,-2400000.0,1254000.0,-77000.0,-488000.0

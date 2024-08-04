@@ -38,23 +38,30 @@ class Stock:
 
         self.scheda = load_scheda(isin)
         self.financials = load_financials(isin)
-        
-        self.yahoo_code = f"{self.scheda['Codice Alfanumerico'].item()}.MI"
+
+        self.code = self.scheda['Codice Alfanumerico'].item()
+        self.yahoo_code = f"{self.code}.MI"
         self.ticker = Ticker(self.yahoo_code.upper())
 
         self.name = euronext_milan[isin]
         self.sector = self.get_super_sector()
         self.financial_coefficient = self.get_financial_coefficient()
-
         self._reference_price = None
-        self._hist = None
-        self._info = None
+
         self._yearly_financials = None
         self._quarterly_financials = None
-        self._balance_sheet = None
-        self._cashflow = None
-        self._revenue_and_earning = None
+        
+        self._yearly_balance_sheet = None
         self._quarterly_balance_sheet = None
+
+        self._yearly_cashflow = None
+        self._quarterly_cashflow = None
+        
+        self._yearly_income_statement = None
+        self._quarterly_income_statement = None
+
+        self._hist = None
+        self._info = None
         self._n_shares = None
         self._quarterly_cashflow = None
         self._net_income = None
@@ -62,6 +69,7 @@ class Stock:
         self._total_assets = None
         self._total_liabilities = None
         self._intangible_assets = None
+        self._revenue_and_earning = None
         
         self._pretax_income = None
         self._EBIT = None
@@ -96,7 +104,7 @@ class Stock:
             return ''
         
     def load_financials(self, frequency):
-        new_yearly_financial = self.ticker.all_financial_data(frequency=frequency).set_index('asOfDate')
+        new_yearly_financial = self.ticker.all_financial_data(frequency=frequency).reset_index()
         
         filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
                                  f'{frequency}_financials.csv')
@@ -105,7 +113,9 @@ class Stock:
         else:
             old_yearly_financial  = pd.DataFrame()
         yearly_financials = pd.concat([old_yearly_financial, new_yearly_financial])
-        yearly_financials.to_csv(filepath)
+        yearly_financials['asOfDate'] = pd.to_datetime(yearly_financials['asOfDate'], format='mixed')
+        yearly_financials = yearly_financials.drop_duplicates(subset=['symbol', 'asOfDate', 'periodType'], keep='last')
+        yearly_financials.to_csv(filepath, index=0)
         return yearly_financials
 
     @property
@@ -120,29 +130,84 @@ class Stock:
             self._quarterly_financials = self.load_financials(frequency='q')
         return self._quarterly_financials
 
+    def load_balance_sheet(self, frequency):
+        new_yearly_financial = self.ticker.balance_sheet(frequency=frequency).reset_index()
+        
+        filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
+                                 f'{frequency}_balance_sheet.csv')
+        if file_folder_exists(filepath):
+            old_yearly_financial  = pd.read_csv(filepath)
+        else:
+            old_yearly_financial  = pd.DataFrame()
+
+        yearly_financials = pd.concat([old_yearly_financial, new_yearly_financial])
+        yearly_financials['asOfDate'] = pd.to_datetime(yearly_financials['asOfDate'], format='mixed')
+        yearly_financials = yearly_financials.drop_duplicates(subset=['symbol', 'asOfDate', 'periodType'], keep='last')
+        return yearly_financials
+
     @property
     def yearly_balance_sheet(self):
-        if self._balance_sheet is None:
-            self._balance_sheet = self.ticker.balance_sheet(frequency='a').set_index('asOfDate')
-        return self._balance_sheet
+        if self._yearly_balance_sheet is None:
+            self._yearly_balance_sheet = self.load_balance_sheet(frequency='a')
+        return self._yearly_balance_sheet
 
     @property
     def quarterly_balance_sheet(self):
         if self._quarterly_balance_sheet is None:
-            self._quarterly_balance_sheet = self.ticker.balance_sheet(frequency='q').set_index('asOfDate')
+            self._quarterly_balance_sheet = self.load_balance_sheet(frequency='q')
         return self._quarterly_balance_sheet
+    
+    def load_cashflow(self, frequency):
+        new_yearly_financial = self.ticker.cash_flow(frequency=frequency).reset_index()
+        
+        filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
+                                 f'{frequency}_cashflow.csv')
+        if file_folder_exists(filepath):
+            old_yearly_financial  = pd.read_csv(filepath)
+        else:
+            old_yearly_financial  = pd.DataFrame()
+        yearly_financials = pd.concat([old_yearly_financial, new_yearly_financial])
+        yearly_financials['asOfDate'] = pd.to_datetime(yearly_financials['asOfDate'], format='mixed')
+        yearly_financials = yearly_financials.drop_duplicates(subset=['symbol', 'asOfDate', 'periodType'], keep='last')
+        return yearly_financials
 
     @property
     def yearly_cashflow(self):
-        if self._cashflow is None:
-            self._cashflow = self.ticker.cash_flow(frequency="a").set_index('asOfDate')
-        return self._cashflow
+        if self._yearly_cashflow is None:
+            self._yearly_cashflow = self.load_cashflow(frequency='a')
+        return self._yearly_cashflow
 
     @property
     def quarterly_cashflow(self):
         if self._quarterly_cashflow is None:
-            self._quarterly_cashflow = self.ticker.cash_flow(frequency="q").set_index('asOfDate')
+            self._quarterly_cashflow = self.load_cashflow(frequency='q')
         return self._quarterly_cashflow
+
+    def load_income_statement(self, frequency):
+        new_yearly_financial = self.ticker.income_statement(frequency=frequency).reset_index()
+        
+        filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
+                                 f'{frequency}_income_statement.csv')
+        if file_folder_exists(filepath):
+            old_yearly_financial  = pd.read_csv(filepath)
+        else:
+            old_yearly_financial  = pd.DataFrame()
+        yearly_financials = pd.concat([old_yearly_financial, new_yearly_financial])
+        yearly_financials['asOfDate'] = pd.to_datetime(yearly_financials['asOfDate'], format='mixed')
+        yearly_financials = yearly_financials.drop_duplicates(subset=['symbol', 'asOfDate', 'periodType'], keep='last')
+        return yearly_financials
+
+    @property
+    def yearly_income_statement(self):
+        if self._yearly_income_statement is None:
+            self._yearly_income_statement = self.load_income_statement(frequency='a')
+        return self._yearly_income_statement
+
+    @property
+    def quarterly_income_statement(self):
+        if self._quarterly_income_statement is None:
+            self._quarterly_income_statement = self.load_income_statement(frequency='q')
+        return self._quarterly_income_statement
 
     @property
     def revenue_and_earning(self):
@@ -153,13 +218,16 @@ class Stock:
     @property
     def n_shares(self):
         if self._n_shares is None:
-            try:
-                self._n_shares = (pd.concat([self.yearly_balance_sheet,
-                                            self.quarterly_balance_sheet])
-                                    .reset_index().sort_values(by='asOfDate').dropna()
-                                    .tail(1)['ShareIssued'].item())
-            except:
-                self._n_shares = int(self.market_cap/self.reference_price)
+            if self.get_info('sharesOutstanding') is not None:
+                self._n_shares = self.get_info('sharesOutstanding')
+            else:
+                try:
+                    self._n_shares = (pd.concat([self.yearly_balance_sheet,
+                                                self.quarterly_balance_sheet])
+                                        .reset_index().sort_values(by='asOfDate')[['ShareIssued']]
+                                        .dropna().tail(1).values.item())
+                except:
+                    self._n_shares = int(self.market_cap/self.reference_price)
         return self._n_shares
 
     @property
@@ -194,7 +262,7 @@ class Stock:
 
     def get_info(self, label):
         try:
-            return  self.info[label]
+            return  self.ticker.key_stats[self.yahoo_code][label]
         except:
             return None
 
@@ -255,19 +323,19 @@ class Stock:
     @property
     def total_assets(self):
         if self._total_assets is None:
-            self._total_assets = (pd.concat([self.yearly_balance_sheet['TotalAssets'],
-                                             self.quarterly_balance_sheet['TotalAssets']])
-                                    .reset_index().sort_values(by='asOfDate').dropna()
-                                    .set_index('asOfDate').tail(1)['TotalAssets'].item())
+            self._total_assets = (pd.concat([self.yearly_balance_sheet[['asOfDate','periodType', 'TotalAssets']],
+            self.quarterly_balance_sheet[['asOfDate','periodType', 'TotalAssets']]])
+                .reset_index().sort_values(by='asOfDate').dropna()
+                .set_index('asOfDate').tail(1)['TotalAssets'].item())
         return self._total_assets
 
     @property
     def total_liabilities(self):
         if self._total_liabilities is None:
-            self._total_liabilities = (pd.concat([self.yearly_balance_sheet['TotalLiabilitiesNetMinorityInterest'],
-                                                  self.quarterly_balance_sheet['TotalLiabilitiesNetMinorityInterest']])
-                                         .reset_index().sort_values(by='asOfDate').dropna()
-                                         .set_index('asOfDate').tail(1)['TotalLiabilitiesNetMinorityInterest'].item())
+            self._total_liabilities = (pd.concat([self.yearly_balance_sheet[['asOfDate', 'TotalLiabilitiesNetMinorityInterest']],
+                                                  self.quarterly_balance_sheet[['asOfDate', 'TotalLiabilitiesNetMinorityInterest']]])
+                                         .reset_index(drop=1).sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['TotalLiabilitiesNetMinorityInterest'].values.item())
         return self._total_liabilities
     
     @property
@@ -297,9 +365,8 @@ class Stock:
         if (self.get_info("netIncomeToCommon") is not None) and not isinstance(self.get_info("netIncomeToCommon"), dict):
             return self.get_info("netIncomeToCommon")
         elif 'NetIncome' in self.yearly_financials:
-            return (pd.concat([self.annualize_financials(self.quarterly_financials, 'NetIncome'),
-                                  self.yearly_financials['NetIncome'].reset_index()])
-                             .sort_values(by='asOfDate').dropna().tail(1)['NetIncome'].item())
+            return (pd.concat([self.annualize_financials(self.quarterly_financials.set_index('asOfDate'), 'NetIncome'),
+            self.yearly_financials.set_index('asOfDate')['NetIncome']])).dropna().tail(1)['NetIncome'].item()
         else:
             try:
                 return self.net_income_from_pe()
@@ -494,11 +561,12 @@ class Stock:
     @property
     def current_liabilities(self):
         try:
-            return (pd.concat([self.quarterly_financials['CurrentLiabilities'],
+            return (pd.concat([self.quarterly_financials[['CurrentLiabilities']],
                                self.yearly_financials['CurrentLiabilities']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['CurrentLiabilities'].item())
+                      .sort_values(by='asOfDate')[['CurrentLiabilities']]
+                      .dropna().tail(1).values.item())
         except:
-            if self.sector == 'Financial Services':
+            if self.sector == 'BANCHE':
                 return self.total_liabilities
             else:
                 return np.nan
@@ -524,11 +592,11 @@ class Stock:
         
     @property
     def long_term_debt(self):
-        quarterly_longterm_debt = self.find_longterm_debt_columns(self.quarterly_financials)
-        yearly_longterm_debt = self.find_longterm_debt_columns(self.yearly_financials)
+        quarterly_longterm_debt = self.find_longterm_debt_columns(self.quarterly_balance_sheet.set_index('asOfDate'))
+        yearly_longterm_debt = self.find_longterm_debt_columns(self.yearly_balance_sheet.set_index('asOfDate'))
         return (pd.concat([quarterly_longterm_debt,
-                           yearly_longterm_debt]).reset_index()
-                  .sort_values(by='asOfDate').dropna().tail(1)['LongTermDebt'].item())
+                   yearly_longterm_debt]).reset_index()
+          .sort_values(by='asOfDate').dropna().tail(1)['LongTermDebt'].item())
 
     @property
     def net_cash_per_share(self):
@@ -544,8 +612,8 @@ class Stock:
             elif 'CashAndCashEquivalents' in self.yearly_financials.columns:
                 label = 'CashAndCashEquivalents'
             else: return np.nan
-            return  (pd.concat([self.yearly_financials[label].reset_index(),
-                                              self.annualize_financials(self.quarterly_financials, 
+            return  (pd.concat([self.yearly_financials.set_index('asOfDate')[label].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials.set_index('asOfDate'), 
                                                                         label)])
                                          .reset_index().sort_values(by='asOfDate').dropna()
                                          .set_index('asOfDate').tail(1)[label].item())
@@ -622,11 +690,10 @@ class Stock:
         if   (self.get_info("totalRevenue") is not None) and not isinstance(self.get_info("totalRevenue"), dict):
             return self.get_info("totalRevenue")
         else:
-            return (pd.concat([self.yearly_financials['TotalRevenue'].reset_index(),
-                                              self.annualize_financials(self.quarterly_financials, 
-                                                                        'TotalRevenue')])
-                                         .reset_index().sort_values(by='asOfDate').dropna()
-                                         .set_index('asOfDate').tail(1)['TotalRevenue'].item())
+            return (self.yearly_income_statement[['asOfDate', 
+                                                 'periodType', 
+                                                 'TotalRevenue']]
+                                                 .dropna().tail(1)['TotalRevenue'].values.item())
 
     @property
     def net_income_per_employee(self):

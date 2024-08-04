@@ -1,0 +1,7 @@
+symbol,asOfDate,periodType,currencyCode,AmortizationCashFlow,BeginningCashPosition,CapitalExpenditure,ChangeInCashSupplementalAsReported,ChangeInInventory,ChangeInPayable,ChangeInReceivables,ChangeInWorkingCapital,ChangesInCash,CommonStockIssuance,DeferredTax,Depreciation,DepreciationAndAmortization,EffectOfExchangeRateChanges,EndCashPosition,FinancingCashFlow,FreeCashFlow,InvestingCashFlow,IssuanceOfCapitalStock,NetCommonStockIssuance,NetIncome,NetIncomeFromContinuingOperations,NetInvestmentPurchaseAndSale,NetIssuancePaymentsOfDebt,NetLongTermDebtIssuance,NetOtherFinancingCharges,NetOtherInvestingChanges,NetPPEPurchaseAndSale,OperatingCashFlow,OtherCashAdjustmentInsideChangeinCash,OtherNonCashItems,PensionAndEmployeeBenefitExpense,ProvisionandWriteOffofAssets,PurchaseOfPPE,TaxesRefundPaid
+ITW.MI,2022-12-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,-355000.0,,,,,,,,,,,,,,
+ITW.MI,2023-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,4000.0,,,,,,,,,,,,,,
+ITW.MI,2023-06-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,495000.0,,,,,,,,,,,,,,
+ITW.MI,2023-09-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,-130000.0,,,,,,,,,,,,,,
+ITW.MI,2023-12-31,TTM,EUR,500000.0,2345000.0,-2689000.0,-236000.0,-368000.0,427000.0,1392000.0,1451000.0,449000.0,0.0,-151000.0,253000.0,753000.0,-685000.0,2109000.0,332000.0,728000.0,-3300000.0,0.0,0.0,-275000.0,-330000.0,-741000.0,-50000.0,-50000.0,382000.0,130000.0,-2689000.0,3417000.0,0.0,168000.0,148000.0,1500000.0,-2689000.0,-16000.0
+ITW.MI,2024-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,35000.0,,,,,,,,,,,,,,

@@ -46,8 +46,3 @@ isin_alpha_transcode['yahoo_code'] = isin_alpha_transcode['Codice Alfanumerico']
 isin_alpha_transcode[['Codice Isin', 'Codice Alfanumerico', 'yahoo_code']].to_csv(os.path.join(data_path, 'milan_isin_transcode.csv'), index=0)
 
 company_url_table.to_csv(os.path.join(data_path, 'company_url_table.csv'), index=0)
-
-
-#company_website = it_stocks[['Nome', 'Codice ISIN']].copy()
-#company_website['website'] = it_stocks['Codice ISIN'].apply(isin2website)
-#company_website.to_csv(os.path.join(data_path, 'company_websites.csv'), index=0)

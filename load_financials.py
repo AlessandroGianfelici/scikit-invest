@@ -1,4 +1,3 @@
-
 import os
 import pandas as pd
 from invest import Stock
@@ -10,5 +9,16 @@ for isin in it_stocks['Codice ISIN']:
         mystock = Stock(isin)
         mystock.yearly_financials
         mystock.quarterly_financials
-    except: pass
+
+        mystock.yearly_cashflow
+        mystock.quarterly_cashflow
+        
+        mystock.yearly_balance_sheet
+        mystock.quarterly_balance_sheet
+
+        mystock.yearly_income_statement
+        mystock.quarterly_income_statement
+
+    except: 
+        pass
     print(isin, ' DONE!')

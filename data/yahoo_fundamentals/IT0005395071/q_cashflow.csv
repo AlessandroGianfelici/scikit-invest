@@ -1,0 +1,8 @@
+symbol,asOfDate,periodType,currencyCode,BeginningCashPosition,ChangeInCashSupplementalAsReported,ChangeInInventory,ChangeInOtherCurrentAssets,ChangeInPayable,ChangeInReceivables,ChangeInWorkingCapital,ChangesInCash,CommonStockPayments,DeferredTax,Depreciation,DepreciationAndAmortization,EndCashPosition,FinancingCashFlow,FreeCashFlow,GainLossOnSaleOfPPE,InterestPaidCFO,InterestReceivedCFI,InvestingCashFlow,NetCommonStockIssuance,NetIncome,NetIncomeFromContinuingOperations,NetInvestmentPropertiesPurchaseAndSale,NetIssuancePaymentsOfDebt,NetOtherInvestingChanges,NetShortTermDebtIssuance,OperatingCashFlow,OtherNonCashItems,PurchaseOfInvestmentProperties,RepurchaseOfCapitalStock,SaleOfInvestmentProperties,TaxesRefundPaid
+ZUC.MI,2019-12-31,TTM,EUR,16800000.0,6665000.0,1935000.0,-1934000.0,1754000.0,-421000.0,1334000.0,6665000.0,-863000.0,2006000.0,5029000.0,5029000.0,23465000.0,-1874000.0,9314000.0,44000.0,-35000.0,1000.0,-775000.0,-863000.0,,2472000.0,-744000.0,2789000.0,-32000.0,2789000.0,9314000.0,242000.0,-754000.0,-863000.0,10000.0,-1885000.0
+ZUC.MI,2023-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,1933000.0,,,,,,,,,,,
+ZUC.MI,2023-06-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,-485000.0,,,,,,,,,,,
+ZUC.MI,2023-09-30,3M,EUR,,,,,,,,,,,,,,,,,,,,,1484000.0,,,,,,,,,,,
+ZUC.MI,2023-12-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,-63000.0,,,,,,,,,,,
+ZUC.MI,2024-03-31,3M,EUR,,,,,,,,,,,,,,,,,,,,,1204000.0,,,,,,,,,,,
+ZUC.MI,2024-03-31,TTM,EUR,,,,,,,,,,,,,,,,,,,,,2140000.0,,,,,,,,,,,
