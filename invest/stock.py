@@ -33,7 +33,7 @@ def load_financials(isin):
                                    f'{isin}.csv')).set_index('Millenium').T.rename(columns={'Income from ordinary activities' : 'Proventi dalle attività ordinarie'})
 
 class Stock:
-    def __init__(self, isin : str):
+    def __init__(self, isin : str, download=True):
         self.isin = isin
 
         self.scheda = load_scheda(isin)
@@ -71,6 +71,7 @@ class Stock:
         self._intangible_assets = None
         self._revenue_and_earning = None
         
+        self.download = download
         self._pretax_income = None
         self._EBIT = None
 
@@ -104,8 +105,11 @@ class Stock:
             return ''
         
     def load_financials(self, frequency):
-        new_yearly_financial = self.ticker.all_financial_data(frequency=frequency).reset_index()
-        
+        if self.download:
+            new_yearly_financial = self.ticker.all_financial_data(frequency=frequency).reset_index()
+        else:
+            new_yearly_financial = pd.DataFrame()
+
         filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
                                  f'{frequency}_financials.csv')
         if file_folder_exists(filepath):
@@ -131,8 +135,10 @@ class Stock:
         return self._quarterly_financials
 
     def load_balance_sheet(self, frequency):
-        new_yearly_financial = self.ticker.balance_sheet(frequency=frequency).reset_index()
-        
+        if self.download:
+            new_yearly_financial = self.ticker.balance_sheet(frequency=frequency).reset_index()
+        else:
+            new_yearly_financial = pd.DataFrame()
         filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
                                  f'{frequency}_balance_sheet.csv')
         if file_folder_exists(filepath):
@@ -158,8 +164,10 @@ class Stock:
         return self._quarterly_balance_sheet
     
     def load_cashflow(self, frequency):
-        new_yearly_financial = self.ticker.cash_flow(frequency=frequency).reset_index()
-        
+        if self.download:
+            new_yearly_financial = self.ticker.cash_flow(frequency=frequency).reset_index()
+        else:
+            new_yearly_financial = pd.DataFrame()
         filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
                                  f'{frequency}_cashflow.csv')
         if file_folder_exists(filepath):
@@ -184,8 +192,10 @@ class Stock:
         return self._quarterly_cashflow
 
     def load_income_statement(self, frequency):
-        new_yearly_financial = self.ticker.income_statement(frequency=frequency).reset_index()
-        
+        if self.download:
+            new_yearly_financial = self.ticker.income_statement(frequency=frequency).reset_index()
+        else:
+            new_yearly_financial = pd.DataFrame()        
         filepath = os.path.join(select_or_create(os.path.join('data', 'yahoo_fundamentals', self.isin)),
                                  f'{frequency}_income_statement.csv')
         if file_folder_exists(filepath):
@@ -667,9 +677,16 @@ class Stock:
                                          .set_index('asOfDate').tail(1)['FreeCashFlow'].item())
             except:
                 try:
-                    return self.operating_cash_flow - self.capital_expenditures
+                    return (pd.concat([self.yearly_cashflow.set_index('asOfDate')['FreeCashFlow'].reset_index(),
+                                              self.annualize_financials(self.quarterly_cashflow.set_index('asOfDate'), 
+                                                                        'FreeCashFlow')])
+                                         .reset_index().sort_values(by='asOfDate').dropna()
+                                         .set_index('asOfDate').tail(1)['FreeCashFlow'].item())
                 except:
-                    return np.nan
+                    try:
+                        return self.operating_cash_flow - self.capital_expenditures
+                    except:
+                        return np.nan
 
     @property
     def capital_expenditures(self):
@@ -747,4 +764,6 @@ class Stock:
         except KeyError:
             logger.warn("Quarterly data not found! Using yearly")
             return self.yearly_financials[label].reset_index().tail(1)
+        except:
+            return pd.DataFrame()
     

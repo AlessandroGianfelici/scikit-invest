@@ -41,17 +41,17 @@ def main_fundamental_indicators(stock):
 
     score["Current Ratio"] = [stock.current_ratio]
 
-    score["Operating Cash Flow Ratio"] = [liquidity.get_operating_cash_flow_ratio(stock.operating_cash_flow,
-                                                                                  stock.current_liabilities)]
-    score["Operating Cash Flow Sales Ratio"] = [liquidity.get_operating_cash_flow_sales_ratio(stock.operating_cash_flow,
-                                                                                              stock.revenue)]
-    score["Short Term Coverage Ratio"] = [liquidity.get_short_term_coverage_ratio(stock.operating_cash_flow,
-                                                                                  stock.accounts_receivable,
-                                                                                  stock.inventory,
-                                                                                  stock.accounts_payable)]
-    score['Working capital over market cap'] = [liquidity.get_working_capital(stock.current_assets,
-                                                                              stock.current_liabilities)/
-                                                                              stock.market_cap]
+    #score["Operating Cash Flow Ratio"] = [liquidity.get_operating_cash_flow_ratio(stock.operating_cash_flow,
+    #                                                                              stock.current_liabilities)]
+    #score["Operating Cash Flow Sales Ratio"] = [liquidity.get_operating_cash_flow_sales_ratio(stock.operating_cash_flow,
+    #                                                                                          stock.revenue)]
+    #score["Short Term Coverage Ratio"] = [liquidity.get_short_term_coverage_ratio(stock.operating_cash_flow,
+    #                                                                              stock.accounts_receivable,
+    #                                                                              stock.inventory,
+    #                                                                              stock.accounts_payable)]
+    #score['Working capital over market cap'] = [liquidity.get_working_capital(stock.current_assets,
+    #                                                                          stock.current_liabilities)/
+    #                                                                          stock.market_cap]
     #EFFICIENCY
     #score["Asset Turnover Ratio"] = [efficiency.get_asset_turnover_ratio(stock.sales,
     #                                                                     stock.total_assets_begin,

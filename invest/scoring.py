@@ -16,7 +16,7 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_liquidity_QR'] = score_QR(indicatori['Quick Ratio'])
     indicatori['score_liquidity_CASHR'] = score_CashRatio(indicatori['Cash Ratio'])
     indicatori['score_liquidity_CUR'] = score_CurrentRatio(indicatori['Current Ratio'])
-    indicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
+    #Findicatori['score_liquidity_OCFR'] = score_OCFR(indicatori['Operating Cash Flow Ratio'])
     #indicatori['score_liquidity_OCFSR'] = score_quantile(indicatori['Operating Cash Flow Sales Ratio'],  nan_score=np.nan)
     #indicatori['score_liquidity_STCFR'] = score_quantile(indicatori['Short Term Coverage Ratio'],  nan_score=np.nan)
     #indicatori['score_liquidity_WCOMC'] = score_quantile(indicatori['Working capital over market cap'],  nan_score=np.nan)
