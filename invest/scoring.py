@@ -9,8 +9,8 @@ def compute_score(indicatori : pd.DataFrame):
     #DIVIDEND
     indicatori['score_dividend_YELD'] = score_YELD(indicatori['Dividend yeld'])
     indicatori['score_dividend_PAYOUT'] = score_PAYOUT(indicatori['Payout Ratio'])
-    indicatori['score_dividend_HISTORY'] = score_DIVHIST(indicatori['Number of Years of Dividends'])
-    indicatori['score_dividend_CONSISTENCY'] = score_DIVCONSISTENCY(indicatori['Dividend Consistency'])
+    #indicatori['score_dividend_HISTORY'] = score_DIVHIST(indicatori['Number of Years of Dividends'])
+    #indicatori['score_dividend_CONSISTENCY'] = score_DIVCONSISTENCY(indicatori['Dividend Consistency'])
 
     #LIQUIDITY
     indicatori['score_liquidity_QR'] = score_QR(indicatori['Quick Ratio'])
@@ -27,7 +27,7 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_value_NIPE'] = score_quantile(indicatori['Net income per employee'])
 
     #SOLVENCY
-    indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**-1,  nan_score=np.nan)
+    #indicatori['score_solvency_DAR'] = score_quantile(indicatori['Debt to Assets Ratio']**-1,  nan_score=np.nan)
     #indicatori['score_solvency_DER'] = score_quantile(indicatori['Debt to Equity Ratio']**-1,  nan_score=np.nan)
     indicatori['score_solvency_ICR'] = score_quantile(indicatori['Interest Coverage Ratio'],  nan_score=np.nan)
     indicatori['score_solvency_DSCR'] = score_quantile(indicatori['Debt Service Coverage Ratio'],  nan_score=np.nan)
@@ -46,15 +46,15 @@ def compute_score(indicatori : pd.DataFrame):
     indicatori['score_value_graham'] = score_graham(indicatori['price_over_graham'])
 
     #GROWTH
-    indicatori['score_growth_netincome'] = 5*(indicatori['NetIncome derivative'] > 0).astype(int)
-    indicatori['score_growth_revenue'] = 5*(indicatori['Revenue derivative'] > 0).astype(int)
+    #indicatori['score_growth_netincome'] = 5*(indicatori['NetIncome derivative'] > 0).astype(int)
+    #indicatori['score_growth_revenue'] = 5*(indicatori['Revenue derivative'] > 0).astype(int)
     #indicatori['score_growth_operatingrevenue'] = 5*(indicatori['OperatingRevenue derivative'] > 0).astype(int)
-    indicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
+    #Findicatori['score_growth_assets'] = 5*(indicatori['TotalAssets derivative'] > 0).astype(int)
     #indicatori['score_growth_freecashflow'] = 5*(indicatori['FreeCashFlow derivative'] > 0).astype(int)
     #indicatori['score_growth_tangiblebookvalue'] = 5*(indicatori['TangibleBookValue derivative'] > 0).astype(int)
 
     #TECHNICAL
-    indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
+    #indicatori['score_technical_sttrend'] = score_TREND(indicatori['st_trend_magnitude'])
     indicatori['score_technical_lttrend'] = score_TREND(indicatori['lt_trend_magnitude'])
     #indicatori['score_technical_volatility'] = score_quantile(-indicatori['volatility'])
 
@@ -99,7 +99,7 @@ def get_indicators(stock):
 
     tmp['sector'] = stock.sector
     tmp['description'] = stock.get_info('longBusinessSummary')
-    tmp['#div_past20y'] = years_of_dividend_payments(stock)
+    #tmp['#div_past20y'] = years_of_dividend_payments(stock)
     tmp['score_dividend_DIVTREND'] = score_DIVTREND(stock)
     return tmp
 

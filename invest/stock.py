@@ -457,12 +457,15 @@ class Stock:
             print(f"{e}: {e.__doc__}")
             return 0
 
+    def last_point_financial(self, keyword):
+        return (pd.concat([self.quarterly_financials[['asOfDate', keyword]],
+                               self.yearly_financials[['asOfDate', keyword]]]).reset_index()
+                      .sort_values(by='asOfDate').dropna().tail(1)[keyword].item())
+
     @property
     def accounts_payable(self):
         try:
-            return (pd.concat([self.quarterly_financials['AccountsPayable'],
-                               self.yearly_financials['AccountsPayable']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['AccountsPayable'].item())
+            return  self.last_point_financial(keyword='AccountsPayable')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
@@ -470,9 +473,7 @@ class Stock:
     @property
     def total_equity(self):
         try:
-            return (pd.concat([self.quarterly_financials['TotalEquityGrossMinorityInterest'],
-                               self.yearly_financials['TotalEquityGrossMinorityInterest']]).reset_index()
-                     .sort_values(by='asOfDate').dropna().tail(1)['TotalEquityGrossMinorityInterest'].item())
+            return  self.last_point_financial(keyword='TotalEquityGrossMinorityInterest')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -481,9 +482,7 @@ class Stock:
     @property
     def cash_and_equivalents(self):
         try:
-            return (pd.concat([self.quarterly_financials['CashAndCashEquivalents'],
-                               self.yearly_financials['CashAndCashEquivalents']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['CashAndCashEquivalents'].item())
+            return  self.last_point_financial(keyword='CashAndCashEquivalents')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return np.nan
@@ -520,9 +519,7 @@ class Stock:
     @property
     def marketable_securities(self):
         try:
-            return (pd.concat([self.quarterly_financials['AvailableForSaleSecurities'],
-                               self.yearly_financials['AvailableForSaleSecurities']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['AvailableForSaleSecurities'].item())
+            return  self.last_point_financial(keyword='AvailableForSaleSecurities')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
@@ -530,12 +527,10 @@ class Stock:
     @property
     def current_assets(self):
         try:
-            return (pd.concat([self.quarterly_financials['CurrentAssets'],
-                               self.yearly_financials['CurrentAssets']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['CurrentAssets'].item())
+            return  self.last_point_financial(keyword='CurrentAssets')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
-            if self.sector == 'Financial Services':
+            if (self.sector == 'Financial Services') or (self.sector == "BANCHE"):
                 return self.total_assets
             else:
                 return np.nan
@@ -547,9 +542,7 @@ class Stock:
     @property
     def inventory(self):
         try:
-            return (pd.concat([self.quarterly_financials['Inventory'],
-                               self.yearly_financials['Inventory']]).reset_index()
-                      .sort_values(by='asOfDate').dropna().tail(1)['Inventory'].item())
+            return  self.last_point_financial(keyword='Inventory')
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0 #Insurance and banks do not have inventory
@@ -561,10 +554,7 @@ class Stock:
     @property
     def current_liabilities(self):
         try:
-            return (pd.concat([self.quarterly_financials[['CurrentLiabilities']],
-                               self.yearly_financials['CurrentLiabilities']]).reset_index()
-                      .sort_values(by='asOfDate')[['CurrentLiabilities']]
-                      .dropna().tail(1).values.item())
+            return  self.last_point_financial(keyword='CurrentLiabilities')
         except:
             if self.sector == 'BANCHE':
                 return self.total_liabilities
@@ -645,8 +635,8 @@ class Stock:
             return float(self.get_info("operatingCashflow"))
         else:
             try:
-                return (pd.concat([self.yearly_financials['OperatingCashFlow'].reset_index(),
-                                              self.annualize_financials(self.quarterly_financials, 
+                return (pd.concat([self.yearly_financials.set_index('asOfDate')['OperatingCashFlow'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials.set_index('asOfDate'), 
                                                                         'OperatingCashFlow')])
                                          .reset_index().sort_values(by='asOfDate').dropna()
                                          .set_index('asOfDate').tail(1)['OperatingCashFlow'].item())
@@ -670,8 +660,8 @@ class Stock:
             return float(self.get_info("freeCashflow"))
         except:
             try:
-                return (pd.concat([self.yearly_financials['FreeCashFlow'].reset_index(),
-                                              self.annualize_financials(self.quarterly_financials, 
+                return (pd.concat([self.yearly_financials.set_index('asOfDate')['FreeCashFlow'].reset_index(),
+                                              self.annualize_financials(self.quarterly_financials.set_index('asOfDate'), 
                                                                         'FreeCashFlow')])
                                          .reset_index().sort_values(by='asOfDate').dropna()
                                          .set_index('asOfDate').tail(1)['FreeCashFlow'].item())
@@ -683,7 +673,7 @@ class Stock:
 
     @property
     def capital_expenditures(self):
-        return self.tail(1).cashflow["CapitalExpenditures"]
+        return self.cashflow.tail(1)["CapitalExpenditures"].item()
 
     @property
     def revenue(self):
@@ -722,8 +712,8 @@ class Stock:
     def EBIT(self):
         if self._EBIT is None:
             try:
-                self._EBIT = (pd.concat([self.annualize_financials(self.quarterly_financials, 'EBIT'),
-                                         self.yearly_financials['EBIT'].reset_index()])
+                self._EBIT = (pd.concat([self.annualize_financials(self.quarterly_financials.set_index('asOfDate'), 'EBIT'),
+                                         self.yearly_financials.set_index('asOfDate')['EBIT'].reset_index()])
                                 .sort_values(by='asOfDate').dropna().tail(1)['EBIT'].item())
             except:
                 logger.warning('EBIT column not found, recomputing from other quantities')
@@ -733,17 +723,13 @@ class Stock:
     @property
     def pretax_income(self):
         if self._pretax_income is None:
-            self._pretax_income = (pd.concat([self.yearly_financials['PretaxIncome'].reset_index(),
-                                              self.annualize_financials(self.quarterly_financials, 
-                                                                        'PretaxIncome')])
-                                         .reset_index().sort_values(by='asOfDate').dropna()
-                                         .set_index('asOfDate').tail(1)['PretaxIncome'].item())
+            self._pretax_income = self.yearly_income_statement['PretaxIncome'].tail(1).item()
         return self._pretax_income
 
     @property
     def interest_expense(self):
         try:
-            return self.yearly_financials.tail(1)[INTEREST_EXPENSE].item()
+            return self.yearly_income_statement['InterestExpense'].tail(1).item()
         except Exception as e:
             print(f"{e}: {e.__doc__}")
             return 0
